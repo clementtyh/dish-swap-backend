@@ -35,10 +35,10 @@ async def register(user_register: UserRegister  = Body(...)):
     
     except UserAlreadyExistsException as e:
         # Log e
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
     except PasswordsDoNotMatchException as e:
         # Log e
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
     except Exception as e:
         print(e)
-        raise HTTPException(status_code=400, detail="An unknown error has occurred")
+        raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())

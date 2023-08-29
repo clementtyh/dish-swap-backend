@@ -1,7 +1,7 @@
 from pydantic import BaseModel, validator, Field
 from fastapi import HTTPException
 from utils.validator import validate_email, validate_display_name, validate_password
-
+from models.response import ErrorOut
 
 
 class UserRegister(BaseModel):
@@ -13,25 +13,25 @@ class UserRegister(BaseModel):
     @validator("email")
     def validate_email(cls, value):
         if not validate_email(value):
-            raise HTTPException(status_code=400, detail="Email format is not valid")
+            raise HTTPException(status_code=400, detail=ErrorOut(message="Email format is not valid").model_dump())
         return value
 
     @validator("display_name")
     def validate_display_name(cls, value):
         if not validate_display_name(value):
-            raise HTTPException(status_code=400, detail="Display name format is not valid")
+            raise HTTPException(status_code=400, detail=ErrorOut(message="Display name format is not valid").model_dump())
         return value
     
     @validator("password")
     def validate_password(cls, value):
         if not validate_password(value):
-            raise HTTPException(status_code=400, detail="Password does not meet the complexity requirements")
+            raise HTTPException(status_code=400, detail=ErrorOut(message="Password does not meet the complexity requirements").model_dump())
         return value
 
     @validator("confirm_password")
     def validate_confirm_password(cls, value):
         if not validate_password(value):
-            raise HTTPException(status_code=400, detail="Password does not meet the complexity requirements")
+            raise HTTPException(status_code=400, detail=ErrorOut(message="Password does not meet the complexity requirements").model_dump())
         return value
     
 
@@ -44,13 +44,13 @@ class UserDatabaseIn(BaseModel):
     @validator("email")
     def validate_email(cls, value):
         if not validate_email(value):
-            raise HTTPException(status_code=400, detail="Email format is not valid")
+            raise HTTPException(status_code=400, detail=ErrorOut(message="Email format is not valid").model_dump())
         return value
 
     @validator("display_name")
     def validate_display_name(cls, value):
         if not validate_display_name(value):
-            raise HTTPException(status_code=400, detail="Display name format is not valid")
+            raise HTTPException(status_code=400, detail=ErrorOut(message="Display name format is not valid").model_dump())
         return value
     
 
