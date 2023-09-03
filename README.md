@@ -23,7 +23,10 @@ python.exe -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-4. Run App locally
+4. Get database connection cert from Clement
+
+
+5. Run App locally
 ```
 python app/main.py
 ```
