@@ -6,6 +6,9 @@ pipeline {
             steps {
                 echo 'Building...'
                 // Add build steps here
+                 sh '''
+                    docker --version
+                '''
             }
         }
         stage('Test') {
