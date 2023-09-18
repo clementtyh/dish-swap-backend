@@ -1,3 +1,4 @@
+import os
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
@@ -22,6 +23,9 @@ app.include_router(auth_router, prefix="/auth", tags=["Auth"])
 async def custom_exception_handler(request, exc: HTTPException):
     return JSONResponse(status_code=exc.status_code, content=exc.detail)
 
+HOST = os.getenv("HOST")
+PORT = int(os.getenv("PORT"))
+
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="localhost", port=8080, reload=True)
+    uvicorn.run("main:app", host=HOST, port=PORT, reload=True)
