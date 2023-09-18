@@ -29,7 +29,9 @@ async def login(user_login: UserLogin  = Body(...)):
 
         validate_password(challenge_password, user_info.hashed_password)
 
-        token = create_token({"id": user_info.id})
+        minutes_to_expire = 60
+
+        token = create_token({"id": user_info.id}, minutes_to_expire)
 
         payload = {
             "token": token

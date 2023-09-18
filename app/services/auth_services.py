@@ -19,8 +19,8 @@ with open(JWT_PRIVATE_KEY_PATH, "r") as private_key_file:
 ALGORITHM = "RS256"
 
 
-def create_token(data: dict):
-    expiration =  datetime.datetime.utcnow() + datetime.timedelta(minutes=60)
+def create_token(data: dict, minutes_to_expire: int):
+    expiration =  datetime.datetime.utcnow() + datetime.timedelta(minutes=minutes_to_expire)
     return jwt.encode({"exp": expiration, **data}, PRIVATE_KEY, algorithm=ALGORITHM)
 
 
