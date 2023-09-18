@@ -40,3 +40,10 @@ def validate_content_type(value: str):
     if not re.match(display_name_pattern, value):
         return False
     return True
+
+
+def validate_alphanumeric_symbols(value: str):
+    display_name_pattern = "^[a-zA-Z0-9!@#$%^&*]+$"
+    if not re.match(display_name_pattern, value):
+        return False
+    return True

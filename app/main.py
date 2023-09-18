@@ -3,12 +3,12 @@ import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 
+from dotenv import load_dotenv
+load_dotenv()
+
 from api.routes.user_route import router as user_router
 from api.routes.recipe_route import router as recipe_router
 from api.routes.auth_route import router as auth_router
-
-from dotenv import load_dotenv
-load_dotenv()
 
 
 app = FastAPI()
