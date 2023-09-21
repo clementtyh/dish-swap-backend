@@ -8,6 +8,7 @@ pipeline {
                 // Add build steps here
                  sh '''
                     docker --version
+                    ls
                 '''
             }
         }
