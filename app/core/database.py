@@ -19,4 +19,3 @@ class MongoDBConnector:
                 tlsCertificateKeyFile=CERT_FILE_PATH
             )
         return cls.client
-    

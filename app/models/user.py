@@ -13,13 +13,13 @@ class UserRegister(BaseModel):
     @validator("email")
     def validate_email(cls, value):
         if not validate_email(value):
-            raise HTTPException(status_code=400, detail=ErrorOut(message="Email format is not valid").model_dump())
+            raise HTTPException(status_code=400, detail=ErrorOut(message="Invalid email").model_dump())
         return value
 
     @validator("display_name")
     def validate_display_name(cls, value):
         if not validate_display_name(value):
-            raise HTTPException(status_code=400, detail=ErrorOut(message="Display name format is not valid").model_dump())
+            raise HTTPException(status_code=400, detail=ErrorOut(message="Invalid display name").model_dump())
         return value
     
     @validator("password")
@@ -44,13 +44,13 @@ class UserDatabaseIn(BaseModel):
     @validator("email")
     def validate_email(cls, value):
         if not validate_email(value):
-            raise HTTPException(status_code=400, detail=ErrorOut(message="Email format is not valid").model_dump())
+            raise HTTPException(status_code=400, detail=ErrorOut(message="Invalid email").model_dump())
         return value
 
     @validator("display_name")
     def validate_display_name(cls, value):
         if not validate_display_name(value):
-            raise HTTPException(status_code=400, detail=ErrorOut(message="Display name format is not valid").model_dump())
+            raise HTTPException(status_code=400, detail=ErrorOut(message="Invalid display name").model_dump())
         return value
     
 
@@ -58,3 +58,22 @@ class UserDatabaseOut(BaseModel):
     id: str = Field(alias="_id")
     hashed_password: str
     user_type: str
+
+
+    
+class UserProfile(BaseModel):
+    email: str
+    display_name: str
+    user_type: str
+
+    @validator("email")
+    def validate_email(cls, value):
+        if not validate_email(value):
+            raise HTTPException(status_code=400, detail="Invalid email")
+        return value
+
+    @validator("display_name")
+    def validate_display_name(cls, value):
+        if not validate_display_name(value):
+            raise HTTPException(status_code=400, detail="Invalid display name")
+        return value

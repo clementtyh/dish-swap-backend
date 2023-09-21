@@ -4,7 +4,9 @@ from models.user import UserDatabaseIn
 
 from core.database import MongoDBConnector
 
-from exceptions.user_exceptions import UserAlreadyExistsException, PasswordsDoNotMatchException
+from exceptions.user_exceptions import UserAlreadyExistsException, PasswordsDoNotMatchException, UserNotFoundException
+from models.user import UserDatabaseOut, UserProfile
+
 
 # Get singleton db connection
 user_db_collection = MongoDBConnector.get_client()["dishswapdb"]["users"]
@@ -40,5 +42,46 @@ async def create_user(user_database_in: UserDatabaseIn) -> bool:
             return True
 
         return False
+    except Exception as e:
+        raise
+
+
+async def get_user_database_out(email: str):
+    try:
+        user = await user_db_collection.find_one({"email": email})
+        if user:
+            user["_id"] = str(user["_id"])
+
+            return UserDatabaseOut(**user)
+
+        raise UserNotFoundException(email)
+    
+    except Exception as e:
+        raise
+
+
+async def get_user_profile(email: str):
+    try:
+        user = await user_db_collection.find_one({"email": email})
+
+        if user:
+            return UserProfile(**user)
+
+        raise UserNotFoundException(email)
+    
+    except Exception as e:
+        raise
+
+
+async def get_user_profile_with_id(id: str):
+    try:
+        user = await user_db_collection.find_one({"_id": ObjectId(id)})
+        if user:
+            user["_id"] = str(user["_id"])
+
+            return UserProfile(**user)
+
+        raise UserNotFoundException(id)
+    
     except Exception as e:
         raise
