@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  dishswap-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8090:8090"
+    environment:
+      HOST: "0.0.0.0"
+      PORT: 8090
+      DB_URI: "mongodb+srv://dishswap.nnokwuw.mongodb.net/?authSource=%24external&authMechanism=MONGODB-X509&retryWrites=true&w=majority"
+      CERT_FILE_PATH: "/secrets/X509-cert-7139973848924752117.pem"
+      JWT_PUBLIC_KEY_PATH: "/secrets/public_key.pem"
+      JWT_PRIVATE_KEY_PATH: "/secrets/private_key.pem"
+    volumes:
+      - /home/kiriko/dishswap_keys:/secrets
