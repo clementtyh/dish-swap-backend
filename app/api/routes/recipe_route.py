@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import JSONResponse
 from models.response import ErrorOut
 from services.recipe_services import get_recipes, get_recipe
 from exceptions.recipe_exceptions import RecipeNotFoundException
@@ -12,9 +13,10 @@ async def root():
 @router.get("/all/{page}")
 async def getAll(page):
     try:
-        recipes = await get_recipes(page)
+        result = await get_recipes(page)
+        headers = {"X-Total-Count": str(result["count"])}
 
-        return recipes
+        return JSONResponse(content=result["recipes"], headers=headers)
 
     except Exception as e:
         print(e)
