@@ -21,13 +21,13 @@ async def check_user_exist(email: str, display_name: str):
         query = {}
 
         if email:
-            query["email"] = email
+            query["$or"] = [{"email": email}]
         if display_name:
-            query["display_name"] = display_name
+            query["$or"].append({"display_name": display_name})
 
-        document = await user_db_collection.find_one(query)
+        user_doc = await user_db_collection.find_one(query)
 
-        if document is not None:
+        if user_doc is not None:
             raise UserAlreadyExistsException
         
     except Exception as e:
