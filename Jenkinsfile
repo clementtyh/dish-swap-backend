@@ -14,13 +14,22 @@ pipeline {
         }
         stage('Test') {
             steps {
-                echo 'Testing...'
+                echo 'Testing'
                 // Add test steps here
+            }
+        }
+        stage('Docker Login') {
+            steps {
+                echo 'Docker Login'
+                // Add test steps here
+                sh '''
+                    cat /home/kiriko/docker_keys/docker_passwd.txt | docker login --username clementtyh --password-stdin
+                '''
             }
         }
         stage('Deploy') {
             steps {
-                echo 'Deploying...'
+                echo 'Deploying'
                 // Add deploy steps here
                 sh '''
                     docker-compose down
@@ -31,7 +40,7 @@ pipeline {
         }
         stage('Clean Up') {
             steps {
-                echo 'Deploying...'
+                echo 'Cleaning Up'
                 // Add deploy steps here
                 sh '''
                     docker image prune --all --force
