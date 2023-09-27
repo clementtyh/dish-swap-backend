@@ -18,7 +18,7 @@ pipeline {
                 // Add test steps here
             }
         }
-        stage('Docker Push Backup') {
+        stage('Docker Push Stable Backup') {
             steps {
                 echo 'Docker'
                 // Add test steps here
@@ -26,9 +26,6 @@ pipeline {
                     docker tag clementtyh/dishswap-backend:latest clementtyh/dishswap-backend:stable
                 '''
                 script {
-                    // Use the Docker credentials by ID
-                    def dockerCredentials = credentials('fd312ca4-a214-47f0-bff0-453e4b3ed27d')
-                    
                     // Log in to Docker Hub
                     docker.withRegistry('https://registry.hub.docker.com', 'fd312ca4-a214-47f0-bff0-453e4b3ed27d') {
                         // This block runs with Docker authentication
@@ -47,6 +44,19 @@ pipeline {
                     docker-compose build --no-cache
                     docker-compose up -d
                 '''
+            }
+        }
+        stage('Docker Push Latest Backup') {
+            steps {
+                echo 'Docker'
+                script {
+                    // Log in to Docker Hub
+                    docker.withRegistry('https://registry.hub.docker.com', 'fd312ca4-a214-47f0-bff0-453e4b3ed27d') {
+                        // This block runs with Docker authentication
+                        // You can push and pull Docker images here
+                        docker.image('clementtyh/dishswap-backend:latest').push()
+                    }
+                }
             }
         }
         stage('Clean Up') {
