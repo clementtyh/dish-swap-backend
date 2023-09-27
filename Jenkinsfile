@@ -23,10 +23,19 @@ pipeline {
                 echo 'Docker'
                 // Add test steps here
                 sh '''
-                    timestamp=$(date +%s)
-                    docker tag clementtyh/dishswap-backend:latest clementtyh/dishswap-backend:$timestamp
-                    docker push clementtyh/dishswap-backend:$timestamp
+                    docker tag clementtyh/dishswap-backend:latest clementtyh/dishswap-backend:stable
                 '''
+                script {
+                    // Use the Docker credentials by ID
+                    def dockerCredentials = credentials('fd312ca4-a214-47f0-bff0-453e4b3ed27d')
+                    
+                    // Log in to Docker Hub
+                    docker.withRegistry('https://registry.hub.docker.com', dockerCredentials) {
+                        // This block runs with Docker authentication
+                        // You can push and pull Docker images here
+                        docker.image('clementtyh/dishswap-backend:stable').push()
+                    }
+                }
             }
         }
         stage('Deploy') {
