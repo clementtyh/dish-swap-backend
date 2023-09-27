@@ -23,7 +23,7 @@ pipeline {
                 echo 'Docker Login'
                 // Add test steps here
                 sh '''
-                    docker login
+                    docker login -i
                 '''
             }
         }
