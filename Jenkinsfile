@@ -18,15 +18,6 @@ pipeline {
                 // Add test steps here
             }
         }
-        stage('Docker Login') {
-            steps {
-                echo 'Docker Login'
-                // Add test steps here
-                sh '''
-                    docker login -i
-                '''
-            }
-        }
         stage('Deploy') {
             steps {
                 echo 'Deploying'
