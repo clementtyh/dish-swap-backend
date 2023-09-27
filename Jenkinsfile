@@ -24,8 +24,8 @@ pipeline {
                 // Add test steps here
                 sh '''
                     timestamp=$(date +%s)
-                    docker tag clementtyh/dishswap-backend-image:latest clementtyh/dishswap-backend-image:$timestamp
-                    docker push clementtyh/dishswap-backend-image:$timestamp
+                    docker tag clementtyh/dishswap-backend:latest clementtyh/dishswap-backend:$timestamp
+                    docker push clementtyh/dishswap-backend:$timestamp
                 '''
             }
         }
