@@ -23,7 +23,7 @@ pipeline {
                 echo 'Docker Login'
                 // Add test steps here
                 sh '''
-                    cat /home/kiriko/docker_keys/docker_passwd.txt | docker login --username clementtyh --password-stdin
+                    docker login
                 '''
             }
         }
