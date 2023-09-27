@@ -65,7 +65,6 @@ pipeline {
                 // Add deploy steps here
                 sh '''
                     docker image prune --all --force
-                    docker push clementtyh/dishswap-backend-image:latest
                 '''
             }
         }
