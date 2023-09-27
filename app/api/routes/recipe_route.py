@@ -7,9 +7,9 @@ from exceptions.recipe_exceptions import RecipeNotFoundException
 router = APIRouter()
 
 @router.get("/")
-async def root(page=1):
+async def root(page=1, search=""):
     try:
-        result = await get_recipes(page)
+        result = await get_recipes(page, search)
         headers = {"X-Total-Count": str(result["count"])}
 
         return JSONResponse(content=result["recipes"], headers=headers)
