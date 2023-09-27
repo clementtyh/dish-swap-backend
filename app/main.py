@@ -12,7 +12,7 @@ from api.routes.recipe_route import router as recipe_router
 from api.routes.auth_route import router as auth_router
 
 
-app = FastAPI()
+app = FastAPI(root_path="/api/v1")
 
 # Allow all origins to make requests
 origins = ["*"]
