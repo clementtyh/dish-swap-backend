@@ -23,7 +23,7 @@ pipeline {
                 echo 'Docker'
                 // Add test steps here
                 sh '''
-                    docker tag clementtyh/dishswap-backend:latest clementtyh/dishswap-backend:stable
+                    docker tag registry.hub.docker.com/clementtyh/dishswap-backend:stable clementtyh/dishswap-backend:stable
                 '''
                 script {
                     // Log in to Docker Hub
