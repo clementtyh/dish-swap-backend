@@ -54,7 +54,7 @@ class RecipeCreate(BaseModel):
             raise HTTPException(status_code=400, detail=ErrorOut(message="Invalid difficulty").model_dump())
         return float(value)
 
-    @validator("image_name")
+    @validator("image_name", pre=True)
     def validate_image_name(cls, value):
         if value is None:
             return None
@@ -86,9 +86,10 @@ class RecipeDatabaseIn(BaseModel):
     ingredients: str
     steps: str
     total_time: str
-    difficulty: str
+    difficulty: float
     image_name: Optional[str] = None
     image_file: Optional[UploadFile] = None
+    isDeleted : str
     created_by: str
     created_date: str
     last_updated_by: str
@@ -130,7 +131,7 @@ class RecipeDatabaseIn(BaseModel):
             raise HTTPException(status_code=400, detail=ErrorOut(message="Invalid difficulty").model_dump())
         return float(value)
 
-    @validator("image_name")
+    @validator("image_name", pre=True)
     def validate_image_name(cls, value):
         if value is None:
             return None
