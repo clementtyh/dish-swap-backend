@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 
 def validate_password(value: str):
     password_pattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
@@ -47,3 +48,13 @@ def validate_alphanumeric_symbols(value: str):
     if not re.match(display_name_pattern, value):
         return False
     return True
+
+def validate_number(value: str):
+    try:
+        float(value)
+        return True
+    except ValueError:
+        return False
+
+def validate_max_length(value: str, max_length: int):
+    return len(value) <= max_length
