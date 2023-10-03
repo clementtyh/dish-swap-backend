@@ -40,7 +40,8 @@ def validate_token(request: Request) -> str:
         # Extract the token from the Authorization header
         auth_header = request.headers.get("Authorization")
         if not auth_header or not auth_header.startswith("Bearer "):
-            raise HTTPException(status_code=401, detail=ErrorOut(message="Invalid authorization header").model_dump())
+            return ''
+        
         token = auth_header.split("Bearer ")[1]
         
         # Verify the token

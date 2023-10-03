@@ -6,22 +6,54 @@ from models.recipe import RecipeDatabaseIn
 # Get singleton db connection
 recipe_db_collection = MongoDBConnector.get_client()["dishswapdb"]["recipes"]
 
-async def get_recipes(page):
+async def get_recipes(page, user_id):
     try:
         count = await recipe_db_collection.count_documents({})
-        recipes = [recipe async for recipe in recipe_db_collection.find({}, skip=9*(int(page)-1), limit=9)]
+        recipes = [recipe async for recipe in recipe_db_collection.find({}, {
+            "name": 1,
+            "imgPath": 1,
+            "description": 1,
+            "display_name": 1,
+            "ingredients": 1,
+            "preparationSteps": 1,
+            "nutrition": 1,
+            "difficulty": 1,
+            "totalTime": 1,
+            "servings": 1,
+            "reviews": 1,
+            "flavourmarkCount": 1,
+            "flavourmarks": { 
+                "$elemMatch": { "$eq": ObjectId(user_id) }
+            } if user_id else 1
+        }, skip=9*(int(page)-1), limit=9)]
 
         return {"count": count, "recipes": recipes}
         
     except Exception as e:
         raise
 
-async def get_recipe(id):
+async def get_recipe(id, user_id):
     try:
         if not ObjectId.is_valid(id):
             raise InvalidRecipeIDException(id)
 
-        recipe = await recipe_db_collection.find_one({"_id": ObjectId(id)})
+        recipe = await recipe_db_collection.find_one({"_id": ObjectId(id)}, {
+            "name": 1,
+            "imgPath": 1,
+            "description": 1,
+            "display_name": 1,
+            "ingredients": 1,
+            "preparationSteps": 1,
+            "nutrition": 1,
+            "difficulty": 1,
+            "totalTime": 1,
+            "servings": 1,
+            "reviews": 1,
+            "flavourmarkCount": 1,
+            "flavourmarks": { 
+                "$elemMatch": { "$eq": ObjectId(user_id) }
+            } if user_id else 1
+        })
 
         if recipe is None:
             raise RecipeNotFoundException(id)

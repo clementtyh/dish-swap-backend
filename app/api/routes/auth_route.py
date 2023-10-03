@@ -54,6 +54,9 @@ async def login(user_login: UserLogin  = Body(...)):
 @router.post("/verify")
 async def verify(user_id: str = Depends(validate_token)):
     try:
+        if not user_id:
+            raise HTTPException(status_code=401, detail=ErrorOut(message="Invalid authorization header").model_dump())
+        
         return SuccessOut(message="Token is valid")
     except Exception as e:
         raise HTTPException(status_code=400, detail=ErrorOut(message="An unknown error has occurred").model_dump())

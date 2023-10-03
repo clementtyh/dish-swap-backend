@@ -192,4 +192,4 @@ class RecipeDatabaseOut(BaseModel):
     servings: int
     reviews: List[Review]
     flavourmarkCount: int
-    flavourmarks: List[PydanticObjectId]
+    flavourmarks: Optional[List[PydanticObjectId]] = []

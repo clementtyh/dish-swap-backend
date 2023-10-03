@@ -10,9 +10,9 @@ from models.recipe import RecipeCreate, RecipeDatabaseIn, RecipeDatabaseOut
 router = APIRouter()
 
 @router.get("/", response_model=List[RecipeDatabaseOut])
-async def root(response: Response, page=1):
+async def root(response: Response, page=1, user_id: str = Depends(validate_token)):
     try:
-        result = await get_recipes(page)
+        result = await get_recipes(page, user_id)
         response.headers["X-Total-Count"] = str(result["count"])
 
         return result["recipes"]
@@ -22,9 +22,9 @@ async def root(response: Response, page=1):
         raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
     
 @router.get("/{id}", response_model=RecipeDatabaseOut)
-async def getOne(id):
+async def getOne(id, user_id: str = Depends(validate_token)):
     try:
-        recipe = await get_recipe(id)
+        recipe = await get_recipe(id, user_id)
 
         return recipe
 
@@ -68,6 +68,9 @@ async def createRecipe(recipe_data: RecipeCreate = Body(...)):
 @router.post("/add-flavourmark/{id}")
 async def addFlavourmark(id, user_id: str = Depends(validate_token)):
     try:
+        if not user_id:
+            raise HTTPException(status_code=401, detail=ErrorOut(message="Invalid authorization header").model_dump())
+        
         await add_flavourmark_recipe(id, user_id)
 
         return SuccessOut()
@@ -82,6 +85,9 @@ async def addFlavourmark(id, user_id: str = Depends(validate_token)):
 @router.post("/remove-flavourmark/{id}")
 async def removeFlavourmark(id, user_id: str = Depends(validate_token)):
     try:
+        if not user_id:
+            raise HTTPException(status_code=401, detail=ErrorOut(message="Invalid authorization header").model_dump())
+        
         await remove_flavourmark_recipe(id, user_id)
 
         return SuccessOut()
