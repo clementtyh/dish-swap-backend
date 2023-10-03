@@ -1,9 +1,9 @@
-from fastapi import APIRouter, HTTPException, Response
-from models.response import ErrorOut
-from services.recipe_services import get_recipes, get_recipe
-from exceptions.recipe_exceptions import RecipeNotFoundException
+from fastapi import APIRouter, HTTPException, Body, Response
 from typing import List
-from models.recipe import RecipeDatabaseOut
+from services.recipe_services import create_recipe, get_recipes, get_recipe, check_recipe_exist
+from exceptions.recipe_exceptions import RecipeNotFoundException, RecipeAlreadyExistsException
+from models.response import ErrorOut, SuccessOut
+from models.recipe import RecipeCreate, RecipeDatabaseIn, RecipeDatabaseOut
 
 router = APIRouter()
 
@@ -32,3 +32,33 @@ async def getOne(id):
     except Exception as e:
         print(e)
         raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
+
+@router.post("/create")
+async def createRecipe(recipe_data: RecipeCreate = Body(...)):
+    try:
+        await check_recipe_exist(recipe_data.recipe_name)
+
+        recipe_database_in = RecipeDatabaseIn(
+            recipe_name=recipe_data.recipe_name,
+            recipe_description=recipe_data.recipe_description,
+            ingredients=recipe_data.ingredients,
+            steps=recipe_data.steps,
+            total_time=recipe_data.total_time,
+            difficulty=recipe_data.difficulty,
+            image_name=recipe_data.image_name,
+            image_file=recipe_data.image_file,
+            created_by=recipe_data.created_by,
+            created_date= datetime.now(),
+            last_updated_by=recipe_data.created_by,
+            last_updated_date=datetime.now())
+
+        await create_recipe(recipe_database_in)
+
+        return SuccessOut()
+    
+    except RecipeAlreadyExistsException as e:
+        print(e)
+        raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail=ErrorOut(message=str(e)).model_dump())
