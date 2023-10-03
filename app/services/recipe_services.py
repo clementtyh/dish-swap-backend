@@ -10,9 +10,6 @@ async def get_recipes(page):
         count = await recipe_db_collection.count_documents({})
         recipes = [recipe async for recipe in recipe_db_collection.find({}, skip=9*(int(page)-1), limit=9)]
 
-        for recipe in recipes:
-            recipe["_id"] = str(recipe["_id"])
-
         return {"count": count, "recipes": recipes}
         
     except Exception as e:
@@ -28,8 +25,6 @@ async def get_recipe(id):
         if recipe is None:
             raise RecipeNotFoundException(id)
         
-        recipe["_id"] = str(recipe["_id"])
-
         return recipe
         
     except Exception as e:
