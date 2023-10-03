@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Body, Response
 from typing import List
 import datetime
-from services.recipe_services import create_recipe, get_recipes, get_recipe, check_recipe_exist
+from services.recipe_services import create_recipe, get_recipes, get_recipe, check_recipe_exist, add_flavourmark_recipe, remove_flavourmark_recipe
 from exceptions.recipe_exceptions import RecipeNotFoundException, RecipeAlreadyExistsException
 from models.response import ErrorOut, SuccessOut
 from models.recipe import RecipeCreate, RecipeDatabaseIn, RecipeDatabaseOut
@@ -63,3 +63,31 @@ async def createRecipe(recipe_data: RecipeCreate = Body(...)):
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail=ErrorOut(message=str(e)).model_dump())
+    
+@router.post("/add-flavourmark/{id}")
+async def addFlavourmark(id):
+    try:
+        await add_flavourmark_recipe(id)
+
+        return SuccessOut()
+
+    except RecipeNotFoundException as e:
+        print(e)
+        raise HTTPException(status_code=404, detail=ErrorOut(message=str(e)).model_dump())
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
+
+@router.post("/remove-flavourmark/{id}")
+async def removeFlavourmark(id):
+    try:
+        await remove_flavourmark_recipe(id)
+
+        return SuccessOut()
+
+    except RecipeNotFoundException as e:
+        print(e)
+        raise HTTPException(status_code=404, detail=ErrorOut(message=str(e)).model_dump())
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())

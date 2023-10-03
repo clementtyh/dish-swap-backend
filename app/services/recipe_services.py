@@ -1,6 +1,6 @@
 from core.database import MongoDBConnector
 from bson.objectid import ObjectId
-from exceptions.recipe_exceptions import *
+from exceptions.recipe_exceptions import InvalidRecipeIDException, RecipeNotFoundException, RecipeAlreadyExistsException, InvalidRecipeOperationException
 from models.recipe import RecipeDatabaseIn
 
 # Get singleton db connection
@@ -51,3 +51,51 @@ async def create_recipe(recipe_database_in: RecipeDatabaseIn) -> bool:
     
     except Exception as e:
         raise e
+    
+async def add_flavourmark_recipe(id):
+    try:
+        if not ObjectId.is_valid(id):
+            raise InvalidRecipeIDException(id)
+
+        result = await recipe_db_collection.update_one(
+            { 
+                "_id": ObjectId(id), 
+                "flavourmarks": { "$ne": ObjectId("6513f69ed2adc17ac538203d") }
+            },
+            {
+                "$inc": { "flavourmarkCount": 1 },
+                "$push": { "flavourmarks": ObjectId("6513f69ed2adc17ac538203d") }
+            }
+        )
+
+        if not result.modified_count:
+            raise InvalidRecipeOperationException(id)
+        
+        return True
+                
+    except Exception as e:
+        raise
+
+async def remove_flavourmark_recipe(id):
+    try:
+        if not ObjectId.is_valid(id):
+            raise InvalidRecipeIDException(id)
+
+        result = await recipe_db_collection.update_one(
+            { 
+                "_id": ObjectId(id), 
+                "flavourmarks": ObjectId("6513f69ed2adc17ac538203d")
+            },
+            {
+                "$inc": { "flavourmarkCount": -1 },
+                "$pull": { "flavourmarks": ObjectId("6513f69ed2adc17ac538203d") }
+            }
+        )
+
+        if not result.modified_count:
+            raise InvalidRecipeOperationException(id)
+        
+        return True
+        
+    except Exception as e:
+        raise
