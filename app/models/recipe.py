@@ -1,8 +1,23 @@
 from pydantic import BaseModel, validator, Field
 from fastapi import HTTPException, UploadFile
-from utils.validator import *
+from typing import Optional, List
 from models.response import ErrorOut
-from typing import Optional
+from utils.validator import validate_max_length, validate_alphanumeric_symbols, validate_number, validate_filename, validate_content_type, validate_display_name
+from utils.annotations import PydanticObjectId
+from utils.annotations import PydanticObjectId
+
+class Nutrition(BaseModel):
+    calories: str
+    protein: str
+    fat: str
+    carbohydrates: str
+    fiber: str
+    sugar: str
+
+class Review(BaseModel):
+    reviewer: str
+    rating: int
+    review: str
 
 class RecipeCreate(BaseModel):
     recipe_name: str
@@ -79,7 +94,7 @@ class RecipeCreate(BaseModel):
         if not validate_display_name(value):
             raise HTTPException(status_code=400, detail=ErrorOut(message="Invalid created by").model_dump())
         return value
-    
+
 class RecipeDatabaseIn(BaseModel):
     recipe_name: str
     recipe_description: str
@@ -162,3 +177,19 @@ class RecipeDatabaseIn(BaseModel):
         if not validate_display_name(value):
             raise HTTPException(status_code=400, detail=ErrorOut(message="Invalid last updated by").model_dump())
         return value
+
+class RecipeDatabaseOut(BaseModel):
+    id: PydanticObjectId = Field(alias="_id")
+    name: str
+    imgPath: str
+    description: str
+    display_name: str
+    ingredients: List[str]
+    preparationSteps: List[str]
+    nutrition: Nutrition
+    difficulty: str
+    totalTime: str
+    servings: int
+    reviews: List[Review]
+    flavourmarkCount: int
+    flavourmarks: List[PydanticObjectId]
