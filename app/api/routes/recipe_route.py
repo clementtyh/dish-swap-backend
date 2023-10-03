@@ -1,6 +1,7 @@
-from fastapi import APIRouter, HTTPException, Body, Response
+from fastapi import APIRouter, HTTPException, Body, Response, Depends
 from typing import List
 import datetime
+from services.auth_services import validate_token
 from services.recipe_services import create_recipe, get_recipes, get_recipe, check_recipe_exist, add_flavourmark_recipe, remove_flavourmark_recipe
 from exceptions.recipe_exceptions import RecipeNotFoundException, RecipeAlreadyExistsException
 from models.response import ErrorOut, SuccessOut
@@ -65,9 +66,9 @@ async def createRecipe(recipe_data: RecipeCreate = Body(...)):
         raise HTTPException(status_code=500, detail=ErrorOut(message=str(e)).model_dump())
     
 @router.post("/add-flavourmark/{id}")
-async def addFlavourmark(id):
+async def addFlavourmark(id, user_id: str = Depends(validate_token)):
     try:
-        await add_flavourmark_recipe(id)
+        await add_flavourmark_recipe(id, user_id)
 
         return SuccessOut()
 
@@ -79,9 +80,9 @@ async def addFlavourmark(id):
         raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
 
 @router.post("/remove-flavourmark/{id}")
-async def removeFlavourmark(id):
+async def removeFlavourmark(id, user_id: str = Depends(validate_token)):
     try:
-        await remove_flavourmark_recipe(id)
+        await remove_flavourmark_recipe(id, user_id)
 
         return SuccessOut()
 

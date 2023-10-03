@@ -52,7 +52,7 @@ async def create_recipe(recipe_database_in: RecipeDatabaseIn) -> bool:
     except Exception as e:
         raise e
     
-async def add_flavourmark_recipe(id):
+async def add_flavourmark_recipe(id, user_id):
     try:
         if not ObjectId.is_valid(id):
             raise InvalidRecipeIDException(id)
@@ -60,11 +60,11 @@ async def add_flavourmark_recipe(id):
         result = await recipe_db_collection.update_one(
             { 
                 "_id": ObjectId(id), 
-                "flavourmarks": { "$ne": ObjectId("6513f69ed2adc17ac538203d") }
+                "flavourmarks": { "$ne": ObjectId(user_id) }
             },
             {
                 "$inc": { "flavourmarkCount": 1 },
-                "$push": { "flavourmarks": ObjectId("6513f69ed2adc17ac538203d") }
+                "$push": { "flavourmarks": ObjectId(user_id) }
             }
         )
 
@@ -76,7 +76,7 @@ async def add_flavourmark_recipe(id):
     except Exception as e:
         raise
 
-async def remove_flavourmark_recipe(id):
+async def remove_flavourmark_recipe(id, user_id):
     try:
         if not ObjectId.is_valid(id):
             raise InvalidRecipeIDException(id)
@@ -84,11 +84,11 @@ async def remove_flavourmark_recipe(id):
         result = await recipe_db_collection.update_one(
             { 
                 "_id": ObjectId(id), 
-                "flavourmarks": ObjectId("6513f69ed2adc17ac538203d")
+                "flavourmarks": ObjectId(user_id)
             },
             {
                 "$inc": { "flavourmarkCount": -1 },
-                "$pull": { "flavourmarks": ObjectId("6513f69ed2adc17ac538203d") }
+                "$pull": { "flavourmarks": ObjectId(user_id) }
             }
         )
 
