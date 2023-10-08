@@ -1,9 +1,11 @@
-from fastapi import APIRouter, HTTPException, Body
+from fastapi import APIRouter, HTTPException, Body, Depends
 from fastapi.responses import JSONResponse
 from models.response import ErrorOut, SuccessOut
 from services.recipe_services import *
 from exceptions.recipe_exceptions import *
 from models.recipe import *
+from api.routes.file_route import get_file_url
+from services.auth_services import validate_token
 
 router = APIRouter()
 
@@ -34,9 +36,12 @@ async def getOne(id):
         raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
 
 @router.post("/create")
-async def createRecipe(recipe_data: RecipeCreate = Body(...)):
+async def create_recipe(recipe_data: RecipeCreate = Body(...), str = Depends(validate_token)
+):
     try:
         await check_recipe_exist(recipe_data.recipe_name)
+
+        file_urls = get_file_url(recipe_data.image_files)
 
         recipe_database_in = RecipeDatabaseIn(
             recipe_name=recipe_data.recipe_name,
@@ -44,16 +49,14 @@ async def createRecipe(recipe_data: RecipeCreate = Body(...)):
             ingredients=recipe_data.ingredients,
             steps=recipe_data.steps,
             total_time=recipe_data.total_time,
-            difficulty=float(recipe_data.difficulty),
-            image_name=recipe_data.image_name,
-            image_file=recipe_data.image_file,
-            isDeleted = 'N',
+            difficulty=recipe_data.difficulty,
+            servings=recipe_data.servings,
+            image_files=file_urls,
             created_by=recipe_data.created_by,
             created_date= datetime.now(),
             last_updated_by=recipe_data.created_by,
             last_updated_date=datetime.now())
-
-        await create_recipe(recipe_database_in)
+        await insert_recipe(recipe_database_in.model_dump())
 
         return SuccessOut()
     
