@@ -77,7 +77,7 @@ def validate_step(value: str):
     return True
 
 def validate_total_time(value: str):
-    total_time_pattern = "^\d{1,3}$"
+    total_time_pattern = "^(?:[1-9]\d{0,2}|1[0-3]\d{2}|14[0-3][0-9]|143[0-9])$"
     if not re.match(total_time_pattern, value):
         return False
     return True
@@ -89,7 +89,7 @@ def validate_difficulty(value: str):
     return True
 
 def validate_servings(value: str):
-    servings_pattern = "^\d{1,2}$"
+    servings_pattern = "^(?:[1-9]|[1-9]\d)$"
     if not re.match(servings_pattern, value):
         return False
     return True
