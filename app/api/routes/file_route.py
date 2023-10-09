@@ -9,7 +9,7 @@ cloudinary.config(
     api_key='542941728215527',
     api_secret='fOAsjq5kByGalJBEwj0HFfQMr-c')
 
-def get_file_url(image_files: List[UploadFile]):
+def upload_image_files_to_cloud(image_files: List[UploadFile]):
     try:
         file_urls = []
         for file in image_files:

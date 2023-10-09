@@ -13,7 +13,6 @@ class RecipeCreate(BaseModel):
     difficulty: str
     servings: Union [int, str]
     image_files: List[UploadFile]
-    created_by: str
 
     @validator("recipe_name")
     def validate_recipe_name(cls, value):
@@ -133,12 +132,6 @@ class RecipeCreate(BaseModel):
                     status_code=400,
                     detail=ErrorOut(message="File size exceeds the maximum allowed").model_dump()
                 )
-        return value
-    
-    @validator("created_by")
-    def validate_created_by(cls, value):
-        if value is None or not value.strip():
-            raise HTTPException(status_code=400, detail=ErrorOut(message="Created by is required").model_dump())
         return value
     
 class RecipeDatabaseIn(BaseModel):

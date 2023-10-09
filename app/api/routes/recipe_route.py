@@ -4,7 +4,7 @@ from models.response import ErrorOut, SuccessOut
 from services.recipe_services import *
 from exceptions.recipe_exceptions import *
 from models.recipe import *
-from api.routes.file_route import get_file_url
+from api.routes.file_route import upload_image_files_to_cloud
 from services.auth_services import validate_token
 
 router = APIRouter()
@@ -36,12 +36,12 @@ async def getOne(id):
         raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
 
 @router.post("/create")
-async def create_recipe(recipe_data: RecipeCreate = Body(...), str = Depends(validate_token)
+async def create_recipe(recipe_data: RecipeCreate = Body(...), user_id: str = Depends(validate_token)
 ):
     try:
         await check_recipe_exist(recipe_data.recipe_name)
 
-        file_urls = get_file_url(recipe_data.image_files)
+        file_urls = upload_image_files_to_cloud(recipe_data.image_files)
 
         recipe_database_in = RecipeDatabaseIn(
             recipe_name=recipe_data.recipe_name,
@@ -52,9 +52,9 @@ async def create_recipe(recipe_data: RecipeCreate = Body(...), str = Depends(val
             difficulty=recipe_data.difficulty,
             servings=recipe_data.servings,
             image_files=file_urls,
-            created_by=recipe_data.created_by,
+            created_by=user_id,
             created_date= datetime.now(),
-            last_updated_by=recipe_data.created_by,
+            last_updated_by=user_id,
             last_updated_date=datetime.now())
         await insert_recipe(recipe_database_in.model_dump())
 
