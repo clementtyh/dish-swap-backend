@@ -6,19 +6,6 @@ from utils.validator import validate_max_length, validate_alphanumeric_symbols, 
 from utils.annotations import PydanticObjectId
 import datetime
 
-class Nutrition(BaseModel):
-    calories: str
-    protein: str
-    fat: str
-    carbohydrates: str
-    fiber: str
-    sugar: str
-
-class Review(BaseModel):
-    reviewer: str
-    rating: int
-    review: str
-
 class RecipeCreate(BaseModel):
     recipe_name: str
     recipe_description: str
