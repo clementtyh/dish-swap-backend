@@ -51,7 +51,7 @@ async def check_recipe_exist(recipe_name):
     except Exception as e:
         raise e
 
-async def create_recipe(recipe_database_in: RecipeDatabaseIn) -> bool:
+async def insert_recipe(recipe_database_in: RecipeDatabaseIn) -> bool:
     try:
         result = await recipe_db_collection.insert_one(recipe_database_in)
         
