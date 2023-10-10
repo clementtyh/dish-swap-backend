@@ -1,27 +1,27 @@
-from fastapi import APIRouter, HTTPException, Body, Depends
-from fastapi.responses import JSONResponse
-from models.response import ErrorOut, SuccessOut
-from services.recipe_services import *
-from exceptions.recipe_exceptions import *
-from models.recipe import *
-from api.routes.file_route import upload_image_files_to_cloud
+from fastapi import APIRouter, HTTPException, Body, Response, Depends
+from typing import List
 from services.auth_services import validate_token
+from services.recipe_services import *
+from models.response import ErrorOut, SuccessOut
+from models.recipe import *
+from exceptions.recipe_exceptions import *
+from api.routes.file_route import upload_image_files_to_cloud
 
 router = APIRouter()
 
-@router.get("/")
-async def root(page=1):
+@router.get("/", response_model=List[RecipeDatabaseOut])
+async def root(response: Response, page=1):
     try:
         result = await get_recipes(page)
-        headers = {"X-Total-Count": str(result["count"])}
+        response.headers["X-Total-Count"] = str(result["count"])
 
-        return JSONResponse(content=result["recipes"], headers=headers)
+        return result["recipes"]
 
     except Exception as e:
         print(e)
         raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
     
-@router.get("/{id}")
+@router.get("/{id}", response_model=RecipeDatabaseOut)
 async def getOne(id):
     try:
         recipe = await get_recipe(id)
