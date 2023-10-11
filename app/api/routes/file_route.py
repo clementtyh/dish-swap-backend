@@ -3,11 +3,19 @@ import cloudinary.uploader
 from fastapi import HTTPException, UploadFile
 from models.response import ErrorOut
 from typing import List
+import os
+import json
+
+cloudinary_config_path = os.environ.get("CLOUDINARY_CONFIG_JSON")
+
+with open(cloudinary_config_path, "r") as config_file:
+    cloudinary_config = json.load(config_file)
 
 cloudinary.config(
-    cloud_name='dishswap',
-    api_key='542941728215527',
-    api_secret='fOAsjq5kByGalJBEwj0HFfQMr-c')
+    cloud_name=cloudinary_config["cloud_name"],
+    api_key=cloudinary_config["api_key"],
+    api_secret=cloudinary_config["api_secret"]
+)
 
 def upload_image_files_to_cloud(image_files: List[UploadFile]):
     try:
