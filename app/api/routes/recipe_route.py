@@ -1,10 +1,11 @@
-from fastapi import APIRouter, HTTPException, Body, Response
+from fastapi import APIRouter, HTTPException, Body, Response, Depends
 from typing import List
-import datetime
-from services.recipe_services import create_recipe, get_recipes, get_recipe, check_recipe_exist
-from exceptions.recipe_exceptions import RecipeNotFoundException, RecipeAlreadyExistsException
+from services.auth_services import validate_token
+from services.recipe_services import *
 from models.response import ErrorOut, SuccessOut
-from models.recipe import RecipeCreate, RecipeDatabaseIn, RecipeDatabaseOut
+from models.recipe import *
+from exceptions.recipe_exceptions import *
+from api.routes.file_route import upload_image_files_to_cloud
 
 router = APIRouter()
 
@@ -35,9 +36,12 @@ async def getOne(id):
         raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
 
 @router.post("/create")
-async def createRecipe(recipe_data: RecipeCreate = Body(...)):
+async def create_recipe(recipe_data: RecipeCreate = Body(...), user_id: str = Depends(validate_token)
+):
     try:
         await check_recipe_exist(recipe_data.recipe_name)
+
+        file_urls = upload_image_files_to_cloud(recipe_data.image_files)
 
         recipe_database_in = RecipeDatabaseIn(
             recipe_name=recipe_data.recipe_name,
@@ -46,14 +50,13 @@ async def createRecipe(recipe_data: RecipeCreate = Body(...)):
             steps=recipe_data.steps,
             total_time=recipe_data.total_time,
             difficulty=recipe_data.difficulty,
-            image_name=recipe_data.image_name,
-            image_file=recipe_data.image_file,
-            created_by=recipe_data.created_by,
+            servings=recipe_data.servings,
+            image_files=file_urls,
+            created_by=user_id,
             created_date= datetime.now(),
-            last_updated_by=recipe_data.created_by,
+            last_updated_by=user_id,
             last_updated_date=datetime.now())
-
-        await create_recipe(recipe_database_in)
+        await insert_recipe(recipe_database_in.model_dump())
 
         return SuccessOut()
     
