@@ -1,7 +1,7 @@
 import re
 from core.database import MongoDBConnector
 from bson.objectid import ObjectId
-from exceptions.recipe_exceptions import *
+from exceptions.recipe_exceptions import InvalidRecipeIDException, RecipeNotFoundException, RecipeAlreadyExistsException
 from models.recipe import RecipeDatabaseIn
 
 # Get singleton db connection
@@ -12,12 +12,12 @@ async def get_recipes(page, search):
         search_regx = re.compile(fr'.*{re.escape(search)}.*', re.IGNORECASE)
 
         count = await recipe_db_collection.count_documents(
-            {'$or': [{'name': {'$regex': search_regx}}, 
-                    {'description': {'$regex': search_regx}}]}
+            {'$or': [{'recipe_name': {'$regex': search_regx}}, 
+                    {'recipe_description': {'$regex': search_regx}}]}
         )
         recipes = [recipe async for recipe in recipe_db_collection.find(
-            {'$or': [{'name': {'$regex': search_regx}}, 
-                    {'description': {'$regex': search_regx}}]}, 
+            {'$or': [{'recipe_name': {'$regex': search_regx}}, 
+                    {'recipe_description': {'$regex': search_regx}}]}, 
             skip=9*(int(page)-1), 
             limit=9
         )]

@@ -9,6 +9,7 @@ load_dotenv()
 
 from api.routes.user_route import router as user_router
 from api.routes.recipe_route import router as recipe_router
+from api.routes.review_route import router as review_router
 from api.routes.auth_route import router as auth_router
 
 
@@ -28,6 +29,7 @@ app.add_middleware(
 
 app.include_router(user_router, prefix="/user", tags=["User"])
 app.include_router(recipe_router, prefix="/recipe", tags=["Recipe"])
+app.include_router(review_router, prefix="/review", tags=["Review"])
 app.include_router(auth_router, prefix="/auth", tags=["Auth"])
 
 

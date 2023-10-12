@@ -4,19 +4,7 @@ from typing import List, Union
 from models.response import ErrorOut
 from utils.validator import *
 from utils.annotations import PydanticObjectId
-
-class Nutrition(BaseModel):
-    calories: str
-    protein: str
-    fat: str
-    carbohydrates: str
-    fiber: str
-    sugar: str
-
-class Review(BaseModel):
-    reviewer: str
-    rating: int
-    review: str
+import datetime
 
 class RecipeCreate(BaseModel):
     recipe_name: str
@@ -158,9 +146,9 @@ class RecipeDatabaseIn(BaseModel):
     servings: int
     image_files: List[str]
     created_by: str
-    created_date: datetime  
+    created_date: datetime.datetime
     last_updated_by: str
-    last_updated_date: datetime  
+    last_updated_date: datetime.datetime
 
     @validator("recipe_name")
     def validate_recipe_name(cls, value):
@@ -278,16 +266,15 @@ class RecipeDatabaseIn(BaseModel):
 
 class RecipeDatabaseOut(BaseModel):
     id: PydanticObjectId = Field(alias="_id")
-    name: str
-    imgPath: str
-    description: str
-    display_name: str
+    recipe_name: str
+    recipe_description: str
     ingredients: List[str]
-    preparationSteps: List[str]
-    nutrition: Nutrition
+    steps: List[str]
+    total_time: int
     difficulty: str
-    totalTime: str
     servings: int
-    reviews: List[Review]
-    flavourmarkCount: int
-    flavourmarks: List[PydanticObjectId]
+    image_files: List[str]
+    created_by: PydanticObjectId
+    created_date: datetime.datetime
+    last_updated_by: PydanticObjectId
+    last_updated_date: datetime.datetime
