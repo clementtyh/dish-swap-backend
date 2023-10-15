@@ -10,9 +10,9 @@ from api.routes.file_route import upload_image_files_to_cloud
 router = APIRouter()
 
 @router.get("/", response_model=List[RecipeDatabaseOut])
-async def root(response: Response, page=1):
+async def root(response: Response, page=1, search=""):
     try:
-        result = await get_recipes(page)
+        result = await get_recipes(page, search)
         response.headers["X-Total-Count"] = str(result["count"])
 
         return result["recipes"]
