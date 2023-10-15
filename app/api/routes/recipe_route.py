@@ -48,9 +48,9 @@ async def create_recipe(recipe_data: RecipeCreate = Body(...), user_id: str = De
             difficulty=recipe_data.difficulty,
             servings=recipe_data.servings,
             image_files=recipe_data.image_files,
-            created_by=user_id,
+            created_by=PydanticObjectId(user_id),
             created_date= datetime.now(),
-            last_updated_by=user_id,
+            last_updated_by=PydanticObjectId(user_id),
             last_updated_date=datetime.now())
 
         recipe_id = await insert_recipe(recipe_database_in.model_dump())
@@ -58,6 +58,35 @@ async def create_recipe(recipe_data: RecipeCreate = Body(...), user_id: str = De
             return SuccessOut(message="Recipe created successfully", payload={"recipe_id": recipe_id})
         else:
             return ErrorOut(message="Failed to create the recipe")
+                
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail=ErrorOut(message=str(e)).model_dump())
+
+
+@router.post("/update")
+async def update_recipe(recipe_data: RecipeUpdate = Body(...)
+):
+    try:
+        
+        recipe_database_update = RecipeDatabaseUpdate(
+            recipe_id = recipe_data.recipe_id,
+            recipe_name=recipe_data.recipe_name,
+            recipe_description=recipe_data.recipe_description,
+            ingredients=recipe_data.ingredients,
+            steps=recipe_data.steps,
+            total_time=recipe_data.total_time,
+            difficulty=recipe_data.difficulty,
+            servings=recipe_data.servings,
+            image_files=recipe_data.image_files,
+            last_updated_by=PydanticObjectId("6516dd12580bf693ef2edccd"),
+            last_updated_date=datetime.now())
+        
+        update_success = await update_one_recipe(recipe_database_update)
+        if (update_success):
+            return SuccessOut(message="Recipe updated successfully")
+        else:
+            return ErrorOut(message="Failed to update the recipe")
                 
     except Exception as e:
         print(e)
