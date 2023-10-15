@@ -6,6 +6,7 @@ from models.response import ErrorOut, SuccessOut
 from models.recipe import *
 from exceptions.recipe_exceptions import *
 from datetime import datetime
+from api.routes.file_route import delete_cloudinary_images
 
 router = APIRouter()
 
@@ -65,9 +66,18 @@ async def create_recipe(recipe_data: RecipeCreate = Body(...), user_id: str = De
 
 
 @router.post("/update")
-async def update_recipe(recipe_data: RecipeUpdate = Body(...)
+async def update_recipe(recipe_data: RecipeUpdate = Body(...), user_id: str = Depends(validate_token)
 ):
     try:
+        existing_recipe = await get_recipe(recipe_data.recipe_id)
+        
+        existing_image_urls = existing_recipe.get("image_files", [])
+
+        updated_image_urls = recipe_data.image_files
+
+        images_to_delete = list(set(existing_image_urls) - set(updated_image_urls))
+        if(images_to_delete):
+            await delete_cloudinary_images(images_to_delete)
         
         recipe_database_update = RecipeDatabaseUpdate(
             recipe_id = recipe_data.recipe_id,
@@ -79,7 +89,7 @@ async def update_recipe(recipe_data: RecipeUpdate = Body(...)
             difficulty=recipe_data.difficulty,
             servings=recipe_data.servings,
             image_files=recipe_data.image_files,
-            last_updated_by=PydanticObjectId("6516dd12580bf693ef2edccd"),
+            last_updated_by=PydanticObjectId(user_id),
             last_updated_date=datetime.now())
         
         update_success = await update_one_recipe(recipe_database_update)

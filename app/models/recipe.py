@@ -390,18 +390,6 @@ class RecipeDatabaseIn(BaseModel):
                     detail=ErrorOut(message=f"Invalid image url '{image_url}'").model_dump())
         return value
     
-    @validator("created_by")
-    def validate_created_by(cls, value):
-        if value is None:
-            raise HTTPException(status_code=400, detail=ErrorOut(message="Created by is required").model_dump())
-        return value
-    
-    @validator("last_updated_by")
-    def validate_updated_by(cls, value):
-        if value is None:
-            raise HTTPException(status_code=400, detail=ErrorOut(message="Last updated by is required").model_dump())
-        return value
-    
 class RecipeDatabaseOut(BaseModel):
     id: PydanticObjectId = Field(alias="_id")
     recipe_name: str
@@ -416,7 +404,6 @@ class RecipeDatabaseOut(BaseModel):
     created_date: datetime.datetime
     last_updated_by: PydanticObjectId
     last_updated_date: datetime.datetime
-
 
 class RecipeDatabaseUpdate(BaseModel):
     recipe_id: str
@@ -550,10 +537,4 @@ class RecipeDatabaseUpdate(BaseModel):
                 raise HTTPException(
                     status_code=400,
                     detail=ErrorOut(message=f"Invalid image url '{image_url}'").model_dump())
-        return value
-    
-    @validator("last_updated_by")
-    def validate_updated_by(cls, value):
-        if value is None:
-            raise HTTPException(status_code=400, detail=ErrorOut(message="Last updated by is required").model_dump())
         return value
