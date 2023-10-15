@@ -52,7 +52,6 @@ async def create_recipe(recipe_data: RecipeCreate = Body(...), user_id: str = De
             created_date= datetime.now(),
             last_updated_by=user_id,
             last_updated_date=datetime.now())
-        await insert_recipe(recipe_database_in.model_dump())
 
         recipe_id = await insert_recipe(recipe_database_in.model_dump())
         if (recipe_id is not None):
