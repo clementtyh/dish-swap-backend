@@ -1,9 +1,10 @@
 from pydantic import BaseModel, validator, Field
-from fastapi import HTTPException, UploadFile
+from fastapi import HTTPException
 from typing import List, Union
 from models.response import ErrorOut
 from utils.validator import *
 from utils.annotations import PydanticObjectId
+from api.routes.file_route import is_valid_cloudinary_image
 import datetime
 
 class RecipeCreate(BaseModel):
@@ -14,7 +15,7 @@ class RecipeCreate(BaseModel):
     total_time: Union [int, str]
     difficulty: str
     servings: Union [int, str]
-    image_files: List[UploadFile]
+    image_files: List[str]
 
     @validator("recipe_name")
     def validate_recipe_name(cls, value):
@@ -118,22 +119,15 @@ class RecipeCreate(BaseModel):
     
     @validator("image_files")
     def validate_image_files(cls, value):
-        if not value:            
+        if not value or all(image_url is None or not image_url.strip() for image_url in value):
             raise HTTPException(
                 status_code=400,
                 detail=ErrorOut(message="Image file is required").model_dump()) 
-        for file in value:
-            if not validate_content_type(file.content_type):
+        for image_url in value:
+            if not is_valid_cloudinary_image(image_url):
                 raise HTTPException(
                     status_code=400,
-                    detail=ErrorOut(message="Invalid file type").model_dump()
-                )
-
-            if not validate_file_size(len(file.file.read())):
-                raise HTTPException(
-                    status_code=400,
-                    detail=ErrorOut(message="File size exceeds the maximum allowed").model_dump()
-                )
+                    detail=ErrorOut(message=f"Invalid image url '{image_url}'").model_dump())
         return value
 
 class RecipeDatabaseIn(BaseModel):
@@ -252,10 +246,15 @@ class RecipeDatabaseIn(BaseModel):
     
     @validator("image_files")
     def validate_image_files(cls, value):
-        if not value or all(file_url is None or not file_url.strip() for file_url in value):
+        if not value or all(image_url is None or not image_url.strip() for image_url in value):
             raise HTTPException(
                 status_code=400,
                 detail=ErrorOut(message="Image file is required").model_dump()) 
+        for image_url in value:
+            if not is_valid_cloudinary_image(image_url):
+                raise HTTPException(
+                    status_code=400,
+                    detail=ErrorOut(message=f"Invalid image url '{image_url}'").model_dump())
         return value
     
     @validator("created_by")

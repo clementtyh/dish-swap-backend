@@ -1,7 +1,7 @@
 import re
 from core.database import MongoDBConnector
 from bson.objectid import ObjectId
-from exceptions.recipe_exceptions import InvalidRecipeIDException, RecipeNotFoundException, RecipeAlreadyExistsException
+from exceptions.recipe_exceptions import InvalidRecipeIDException, RecipeNotFoundException
 from models.recipe import RecipeDatabaseIn
 
 # Get singleton db connection
@@ -42,23 +42,13 @@ async def get_recipe(id):
     except Exception as e:
         raise
 
-async def check_recipe_exist(recipe_name):
-    try:
-        existing_recipe = await recipe_db_collection.find_one({"recipe_name": recipe_name})
-        if existing_recipe is not None:
-            raise RecipeAlreadyExistsException(recipe_name)
-
-    except Exception as e:
-        raise e
-
-async def insert_recipe(recipe_database_in: RecipeDatabaseIn) -> bool:
+async def insert_recipe(recipe_database_in: RecipeDatabaseIn) -> str:
     try:
         result = await recipe_db_collection.insert_one(recipe_database_in)
-        
-        if result:
-            return True
 
-        return False
-    
+        if result:
+            return str(result.inserted_id)
+
+        return None
     except Exception as e:
         raise e
