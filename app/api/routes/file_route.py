@@ -72,7 +72,6 @@ async def delete_cloudinary_images(image_urls):
             if image_path is not None:
                 result = cloudinary.uploader.destroy(image_path)
                 if result.get("result") != "ok":
-                    print(f"Deleted image: {image_url}")
                     return False
             else:
                 return False
@@ -96,7 +95,6 @@ async def extract_image_path(image_url):
     if version_index + 1 < len(parts):
         image_path = '/'.join(parts[version_index + 1:])
         image_path = image_path.split(".")[0]
-        print("image path is ", image_path)
         return image_path
     else:
         return parts[-1].split(".")[0]
