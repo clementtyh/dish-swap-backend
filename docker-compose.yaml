@@ -17,5 +17,6 @@ services:
       CERT_FILE_PATH: "/secrets/X509-cert-7139973848924752117.pem"
       JWT_PUBLIC_KEY_PATH: "/secrets/public_key.pem"
       JWT_PRIVATE_KEY_PATH: "/secrets/private_key.pem"
+      CLOUDINARY_CONFIG_JSON: "/secrets/cloudinary_config.json"
     volumes:
       - /home/kiriko/dishswap_keys:/secrets
