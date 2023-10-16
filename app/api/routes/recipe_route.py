@@ -76,27 +76,35 @@ async def update_recipe(recipe_data: RecipeUpdate = Body(...), user_id: str = De
         updated_image_urls = recipe_data.image_files
 
         images_to_delete = list(set(existing_image_urls) - set(updated_image_urls))
-        if(images_to_delete):
-            await delete_cloudinary_images(images_to_delete)
         
-        recipe_database_update = RecipeDatabaseUpdate(
-            recipe_id = recipe_data.recipe_id,
-            recipe_name=recipe_data.recipe_name,
-            recipe_description=recipe_data.recipe_description,
-            ingredients=recipe_data.ingredients,
-            steps=recipe_data.steps,
-            total_time=recipe_data.total_time,
-            difficulty=recipe_data.difficulty,
-            servings=recipe_data.servings,
-            image_files=recipe_data.image_files,
-            last_updated_by=PydanticObjectId(user_id),
-            last_updated_date=datetime.now())
+        image_delete_success = False
+        if images_to_delete:
+            image_delete_success = await delete_cloudinary_images(images_to_delete)
         
-        update_success = await update_one_recipe(recipe_database_update)
-        if (update_success):
-            return SuccessOut(message="Recipe updated successfully")
+        if not images_to_delete or (images_to_delete and image_delete_success):
+            recipe_database_update = RecipeDatabaseUpdate(
+                recipe_id = recipe_data.recipe_id,
+                recipe_name=recipe_data.recipe_name,
+                recipe_description=recipe_data.recipe_description,
+                ingredients=recipe_data.ingredients,
+                steps=recipe_data.steps,
+                total_time=recipe_data.total_time,
+                difficulty=recipe_data.difficulty,
+                servings=recipe_data.servings,
+                image_files=recipe_data.image_files,
+                last_updated_by=PydanticObjectId(user_id),
+                last_updated_date=datetime.now())
+            
+            update_success = await update_one_recipe(recipe_database_update)
+            if (update_success):
+                return SuccessOut(message="Recipe updated successfully")
+            else:
+                return ErrorOut(message="Failed to update the recipe")
         else:
-            return ErrorOut(message="Failed to update the recipe")
+            if not image_delete_success:
+                return ErrorOut(message="Failed to delete cloud images")
+            else:
+                return ErrorOut(message="Failed to update the recipe")
                 
     except Exception as e:
         print(e)

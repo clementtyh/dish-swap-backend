@@ -1,5 +1,7 @@
 from fastapi import HTTPException, APIRouter, Depends
 from services.auth_services import validate_token
+from utils.validator import validate_file_size
+from models.response import ErrorOut
 import cloudinary
 import cloudinary.uploader
 import os
@@ -7,7 +9,6 @@ import json
 import time
 import re
 import requests
-from utils.validator import validate_file_size
 
 router = APIRouter()
 
@@ -66,23 +67,34 @@ def is_valid_cloudinary_image(image_url):
 async def delete_cloudinary_images(image_urls):
     try:
         for image_url in image_urls:
-            public_id = await extract_public_id(image_url)
-            folder_path = await extract_folder_path(image_url)
+            image_path = await extract_image_path(image_url)
 
-            result = cloudinary.uploader.destroy(folder_path+public_id)
-            if result.get("result") == "ok":
-                print(f"Deleted image: {image_url}")
+            if image_path is not None:
+                result = cloudinary.uploader.destroy(image_path)
+                if result.get("result") != "ok":
+                    return False
             else:
-                print(f"Failed to delete image: {image_url}")
                 return False
         return True
     except Exception as e:
         print(f"Error deleting images: {str(e)}")
+        raise HTTPException(status_code=500, detail=ErrorOut(message=str(e)).model_dump())
 
-async def extract_public_id(image_url):
-    parts = image_url.split("/")
-    return parts[-1].split(".")[0]
+async def extract_image_path(image_url):
+    parts = image_url.split('/')
 
-async def extract_folder_path(image_url):
-    parts = image_url.split("/")
-    return parts[-2]+"/"
+    version_index = -1
+    for i, part in enumerate(parts):
+        if part.startswith('v'):
+            version_index = i
+            break
+
+    if version_index == -1:
+        return None
+
+    if version_index + 1 < len(parts):
+        image_path = '/'.join(parts[version_index + 1:])
+        image_path = image_path.split(".")[0]
+        return image_path
+    else:
+        return parts[-1].split(".")[0]
