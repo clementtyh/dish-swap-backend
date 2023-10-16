@@ -51,3 +51,15 @@ async def get_reviews(page, recipe):
         
     except Exception as e:
         raise
+
+async def delete_recipe_reviews(recipe_id: str) -> bool:
+    try:
+        if not ObjectId.is_valid(recipe_id):
+            raise InvalidRecipeIDException(recipe_id)
+        
+        await review_db_collection.delete_many({"recipe_id": ObjectId(recipe_id)})
+        
+        return True
+
+    except Exception as e:
+        raise e 

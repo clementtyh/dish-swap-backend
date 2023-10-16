@@ -2,6 +2,9 @@ from fastapi import APIRouter, HTTPException, Body, Response, Depends
 from typing import List
 from services.auth_services import validate_token
 from services.recipe_services import *
+from services.review_services import delete_recipe_reviews
+from services.flavourmark_services import delete_recipe_flavourmarks
+
 from models.response import ErrorOut, SuccessOut
 from models.recipe import *
 from exceptions.recipe_exceptions import *
@@ -105,6 +108,31 @@ async def update_recipe(recipe_data: RecipeUpdate = Body(...), user_id: str = De
                 return ErrorOut(message="Failed to delete cloud images")
             else:
                 return ErrorOut(message="Failed to update the recipe")
+                
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail=ErrorOut(message=str(e)).model_dump())
+    
+@router.post("/delete")
+async def delete_recipe(recipe_id: str
+):
+    try:
+        print(recipe_id)
+        existing_recipe = await get_recipe(recipe_id)
+        
+        existing_image_urls = existing_recipe.get("image_files", [])
+        
+        image_delete_success = await delete_cloudinary_images(existing_image_urls)
+        delete_reviews_success = await delete_recipe_reviews(recipe_id)
+        delete_flavourmark_success = await delete_recipe_flavourmarks(recipe_id)
+        delete_recipe_success = await delete_one_recipe(recipe_id)
+        
+        print(image_delete_success, delete_reviews_success, delete_flavourmark_success, delete_recipe_success)
+        if (image_delete_success and delete_reviews_success and delete_flavourmark_success 
+         and delete_recipe_success):
+            return SuccessOut(message="Recipe deleted successfully")
+        else:
+            return ErrorOut(message="Failed to delete the recipe")
                 
     except Exception as e:
         print(e)
