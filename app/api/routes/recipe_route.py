@@ -114,7 +114,7 @@ async def update_recipe(recipe_data: RecipeUpdate = Body(...), user_id: str = De
         raise HTTPException(status_code=500, detail=ErrorOut(message=str(e)).model_dump())
     
 @router.post("/delete")
-async def delete_recipe(recipe_id: str
+async def delete_recipe(recipe_id: str, user_id: str = Depends(validate_token)
 ):
     try:
         print(recipe_id)
@@ -126,8 +126,7 @@ async def delete_recipe(recipe_id: str
         delete_reviews_success = await delete_recipe_reviews(recipe_id)
         delete_flavourmark_success = await delete_recipe_flavourmarks(recipe_id)
         delete_recipe_success = await delete_one_recipe(recipe_id)
-        
-        print(image_delete_success, delete_reviews_success, delete_flavourmark_success, delete_recipe_success)
+
         if (image_delete_success and delete_reviews_success and delete_flavourmark_success 
          and delete_recipe_success):
             return SuccessOut(message="Recipe deleted successfully")
