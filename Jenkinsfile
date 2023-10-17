@@ -58,6 +58,9 @@ pipeline {
                         // Run Trivy scan and redirect the output to the timestamped scan.log file
                         sh "trivy image clementtyh/dishswap-backend:latest > ${scanLogPath}"
 
+                        // Sleep for 5 seconds
+                        sleep 5
+                        
                         // Archive the scan log for later reference (optional)
                         archiveArtifacts "${scanLogPath}"
                     }
