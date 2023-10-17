@@ -40,7 +40,7 @@ async def getOne(id):
         raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
 
 @router.post("/create")
-async def create_recipe(recipe_data: RecipeCreate = Body(...)
+async def create_recipe(recipe_data: RecipeCreate = Body(...), user_id: str = Depends(validate_token)
 ):
     try:
         recipe_database_in = RecipeDatabaseIn(
@@ -52,9 +52,9 @@ async def create_recipe(recipe_data: RecipeCreate = Body(...)
             difficulty=recipe_data.difficulty,
             servings=recipe_data.servings,
             image_files=recipe_data.image_files,
-            created_by=PydanticObjectId("6516dd12580bf693ef2edccd"),
+            created_by=PydanticObjectId(user_id),
             created_date= datetime.now(),
-            last_updated_by=PydanticObjectId("6516dd12580bf693ef2edccd"),
+            last_updated_by=PydanticObjectId(user_id),
             last_updated_date=datetime.now())
 
         recipe_id = await insert_recipe(recipe_database_in.model_dump())
@@ -103,7 +103,6 @@ async def update_recipe(recipe_data: RecipeUpdate = Body(...), user_id: str = De
                 return SuccessOut(message="Recipe updated successfully")
             else:
                 return ErrorOut(message="Failed to update the recipe")
-
         else:
             if not image_delete_success:
                 return ErrorOut(message="Failed to delete cloud images")
@@ -115,7 +114,7 @@ async def update_recipe(recipe_data: RecipeUpdate = Body(...), user_id: str = De
         raise HTTPException(status_code=500, detail=ErrorOut(message=str(e)).model_dump())
     
 @router.post("/delete")
-async def delete_recipe(recipe_id: str
+async def delete_recipe(recipe_id: str, user_id: str = Depends(validate_token)
 ):
     try:
         existing_recipe = await get_recipe(recipe_id)
