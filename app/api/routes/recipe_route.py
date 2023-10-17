@@ -2,6 +2,9 @@ from fastapi import APIRouter, HTTPException, Body, Response, Depends
 from typing import List
 from services.auth_services import validate_token
 from services.recipe_services import *
+from services.review_services import delete_recipe_reviews, get_reviews_count
+from services.flavourmark_services import delete_recipe_flavourmarks, get_flavourmarks_count
+
 from models.response import ErrorOut, SuccessOut
 from models.recipe import *
 from exceptions.recipe_exceptions import *
@@ -106,6 +109,37 @@ async def update_recipe(recipe_data: RecipeUpdate = Body(...), user_id: str = De
             else:
                 return ErrorOut(message="Failed to update the recipe")
                 
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail=ErrorOut(message=str(e)).model_dump())
+    
+@router.post("/delete")
+async def delete_recipe(recipe_id: str, user_id: str = Depends(validate_token)
+):
+    try:
+        existing_recipe = await get_recipe(recipe_id)
+        existing_image_urls = existing_recipe.get("image_files", [])
+        image_delete_success, delete_reviews_success, delete_flavourmark_success,\
+        delete_recipe_success = False, False, False, False
+        if(existing_image_urls):
+            image_delete_success = await delete_cloudinary_images(existing_image_urls)
+
+        review_count = await get_reviews_count(recipe_id)
+        if review_count > 0:
+            delete_reviews_success = await delete_recipe_reviews(recipe_id)
+
+        flavourmark_count = await get_flavourmarks_count(recipe_id)
+        if flavourmark_count > 0:
+            delete_flavourmark_success = await delete_recipe_flavourmarks(recipe_id)
+
+        delete_recipe_success = await delete_one_recipe(recipe_id)
+
+        if (image_delete_success and (review_count == 0 or delete_reviews_success) and
+            (flavourmark_count == 0 or delete_flavourmark_success) and delete_recipe_success):
+            return SuccessOut(message="Recipe deleted successfully")
+        else:
+            return ErrorOut(message="Failed to delete the recipe")
+
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail=ErrorOut(message=str(e)).model_dump())

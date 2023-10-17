@@ -78,3 +78,17 @@ async def update_one_recipe(recipe_database_update: RecipeDatabaseUpdate) -> boo
             return False
     except Exception as e:
         raise e
+
+async def delete_one_recipe(recipe_id: str) -> bool:
+    try:
+        if not ObjectId.is_valid(recipe_id):
+            raise InvalidRecipeIDException(recipe_id)
+
+        result = await recipe_db_collection.delete_one({"_id": ObjectId(recipe_id)})
+
+        if result.deleted_count == 1:
+            return True
+        else:
+            return False
+    except Exception as e:
+        raise e
