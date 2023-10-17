@@ -2,8 +2,8 @@ from fastapi import APIRouter, HTTPException, Body, Response, Depends
 from typing import List
 from services.auth_services import validate_token
 from services.recipe_services import *
-from services.review_services import delete_recipe_reviews
-from services.flavourmark_services import delete_recipe_flavourmarks
+from services.review_services import delete_recipe_reviews, get_reviews_count
+from services.flavourmark_services import delete_recipe_flavourmarks, get_flavourmarks_count
 
 from models.response import ErrorOut, SuccessOut
 from models.recipe import *
@@ -40,7 +40,7 @@ async def getOne(id):
         raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
 
 @router.post("/create")
-async def create_recipe(recipe_data: RecipeCreate = Body(...), user_id: str = Depends(validate_token)
+async def create_recipe(recipe_data: RecipeCreate = Body(...)
 ):
     try:
         recipe_database_in = RecipeDatabaseIn(
@@ -52,9 +52,9 @@ async def create_recipe(recipe_data: RecipeCreate = Body(...), user_id: str = De
             difficulty=recipe_data.difficulty,
             servings=recipe_data.servings,
             image_files=recipe_data.image_files,
-            created_by=PydanticObjectId(user_id),
+            created_by=PydanticObjectId("6516dd12580bf693ef2edccd"),
             created_date= datetime.now(),
-            last_updated_by=PydanticObjectId(user_id),
+            last_updated_by=PydanticObjectId("6516dd12580bf693ef2edccd"),
             last_updated_date=datetime.now())
 
         recipe_id = await insert_recipe(recipe_database_in.model_dump())
@@ -114,25 +114,32 @@ async def update_recipe(recipe_data: RecipeUpdate = Body(...), user_id: str = De
         raise HTTPException(status_code=500, detail=ErrorOut(message=str(e)).model_dump())
     
 @router.post("/delete")
-async def delete_recipe(recipe_id: str, user_id: str = Depends(validate_token)
+async def delete_recipe(recipe_id: str
 ):
     try:
-        print(recipe_id)
         existing_recipe = await get_recipe(recipe_id)
-        
         existing_image_urls = existing_recipe.get("image_files", [])
-        
-        image_delete_success = await delete_cloudinary_images(existing_image_urls)
-        delete_reviews_success = await delete_recipe_reviews(recipe_id)
-        delete_flavourmark_success = await delete_recipe_flavourmarks(recipe_id)
+        image_delete_success, delete_reviews_success, delete_flavourmark_success,\
+        delete_recipe_success = False, False, False, False
+        if(existing_image_urls):
+            image_delete_success = await delete_cloudinary_images(existing_image_urls)
+
+        review_count = await get_reviews_count(recipe_id)
+        if review_count > 0:
+            delete_reviews_success = await delete_recipe_reviews(recipe_id)
+
+        flavourmark_count = await get_flavourmarks_count(recipe_id)
+        if flavourmark_count > 0:
+            delete_flavourmark_success = await delete_recipe_flavourmarks(recipe_id)
+
         delete_recipe_success = await delete_one_recipe(recipe_id)
 
-        if (image_delete_success and delete_reviews_success and delete_flavourmark_success 
-         and delete_recipe_success):
+        if (image_delete_success and (review_count == 0 or delete_reviews_success) and
+            (flavourmark_count == 0 or delete_flavourmark_success) and delete_recipe_success):
             return SuccessOut(message="Recipe deleted successfully")
         else:
             return ErrorOut(message="Failed to delete the recipe")
-                
+
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail=ErrorOut(message=str(e)).model_dump())

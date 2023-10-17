@@ -10,7 +10,7 @@ async def get_reviews(page, recipe):
         if recipe and not ObjectId.is_valid(recipe):
             raise InvalidRecipeIDException(recipe)
         
-        count = await review_db_collection.count_documents({"recipe_id": ObjectId(recipe)} if recipe else {})
+        count = await get_reviews_count(recipe)
         pipeline = [
             {
                 "$match": {"recipe_id": ObjectId(recipe)} if recipe else {}
@@ -51,6 +51,17 @@ async def get_reviews(page, recipe):
         
     except Exception as e:
         raise
+
+async def get_reviews_count(recipe_id):
+    try:
+        if recipe_id and not ObjectId.is_valid(recipe_id):
+            raise InvalidRecipeIDException(recipe_id)
+        
+        count = await review_db_collection.count_documents({"recipe_id": ObjectId(recipe_id)} if recipe_id else {})
+        
+        return count
+    except Exception as e:
+        raise e
 
 async def delete_recipe_reviews(recipe_id: str) -> bool:
     try:
