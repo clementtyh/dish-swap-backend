@@ -2,25 +2,16 @@ pipeline {
     agent any
 
     stages {
-        stage('Build') {
-            steps {
-                echo 'Building...'
-                // Add build steps here
-                 sh '''
-                    docker --version
-                    pwd
-                '''
-            }
-        }
         stage('Test') {
             steps {
                 echo 'Testing'
                 // Add test steps here
             }
         }
+        
         stage('Docker Push Stable Backup') {
             steps {
-                echo 'Docker'
+                echo 'Pushing stable container'
                 // Add test steps here
                 sh '''
                     docker tag registry.hub.docker.com/clementtyh/dishswap-backend:latest clementtyh/dishswap-backend:stable
@@ -64,7 +55,16 @@ pipeline {
         
         stage('Manual Approval') {
             steps {
-                input "Check the latest scan results in /var/lib/jenkins/scan_logs. Do you want to proceed with deployment?"
+                script {
+                    // Define the path for the scan.log file with a timestamp
+                    def scanLogPath = "/var/lib/jenkins/scan_logs/scan_${BUILD_ID}.log"
+
+                    // Display information about the scan results and ask for manual approval
+                    input message: """
+                        Check the latest scan results in ${scanLogPath}.
+                        Do you want to proceed with deployment?
+                    """
+                }
             }
         }
 
@@ -80,7 +80,7 @@ pipeline {
         
         stage('Docker Push Latest Backup') {
             steps {
-                echo 'Docker'
+                echo 'Pushing Latest Container'
                 script {
                     // Log in to Docker Hub
                     docker.withRegistry('https://registry.hub.docker.com', 'fd312ca4-a214-47f0-bff0-453e4b3ed27d') {
