@@ -53,7 +53,7 @@ pipeline {
                 timestamps {
                     script {
                         // Define the path for the scan.log file with a timestamp
-                        def scanLogPath = "/home/kiriko/scan_logs/scan_${BUILD_ID}.log"
+                        def scanLogPath = "/var/lib/jenkins/workspace/scan_logs/scan_${BUILD_ID}.log"
 
                         // Run Trivy scan and redirect the output to the timestamped scan.log file
                         sh "trivy image clementtyh/dishswap-backend:latest > ${scanLogPath}"
