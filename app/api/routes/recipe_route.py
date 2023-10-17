@@ -103,6 +103,7 @@ async def update_recipe(recipe_data: RecipeUpdate = Body(...), user_id: str = De
                 return SuccessOut(message="Recipe updated successfully")
             else:
                 return ErrorOut(message="Failed to update the recipe")
+
         else:
             if not image_delete_success:
                 return ErrorOut(message="Failed to delete cloud images")
