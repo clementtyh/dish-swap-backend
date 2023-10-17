@@ -35,6 +35,13 @@ pipeline {
                 }
             }
         }
+        
+        stage('Manual Approval') {
+            steps {
+                input "Do you want to proceed with deployment?"
+            }
+        }
+
         stage('Deploy') {
             steps {
                 echo 'Deploying'
