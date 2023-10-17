@@ -35,10 +35,39 @@ pipeline {
                 }
             }
         }
+
+        stage('Build Container') {
+            steps {
+                echo 'Building Container'
+                // Add deploy steps here
+                sh '''
+                    docker-compose down
+                    docker-compose build --no-cache
+                '''
+            }
+        }
+
+        stage('Container Scan') {
+            steps {
+                echo 'Scanning Container'
+                timestamps {
+                    script {
+                        // Define the path for the scan.log file with a timestamp
+                        def scanLogPath = "/home/kiriko/scan_logs/scan_${BUILD_ID}.log"
+
+                        // Run Trivy scan and redirect the output to the timestamped scan.log file
+                        sh "trivy image clementtyh/dishswap-backend:latest > ${scanLogPath}"
+
+                        // Archive the scan log for later reference (optional)
+                        archiveArtifacts "${scanLogPath}"
+                    }
+                }
+            }
+        }
         
         stage('Manual Approval') {
             steps {
-                input "Do you want to proceed with deployment?"
+                input "Check the latest scan results in /home/kiriko/scan_logs. Do you want to proceed with deployment?"
             }
         }
 
@@ -47,12 +76,11 @@ pipeline {
                 echo 'Deploying'
                 // Add deploy steps here
                 sh '''
-                    docker-compose down
-                    docker-compose build --no-cache
                     docker-compose up -d
                 '''
             }
         }
+        
         stage('Docker Push Latest Backup') {
             steps {
                 echo 'Docker'
@@ -66,6 +94,7 @@ pipeline {
                 }
             }
         }
+        
         stage('Clean Up') {
             steps {
                 echo 'Cleaning Up'
