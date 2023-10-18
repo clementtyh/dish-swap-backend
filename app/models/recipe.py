@@ -5,7 +5,6 @@ from models.response import ErrorOut
 from utils.validator import *
 from utils.annotations import PydanticObjectId
 from api.routes.file_route import is_valid_cloudinary_image
-from exceptions.recipe_exceptions import *
 from datetime import datetime
 
 class Recipe(BaseModel):
