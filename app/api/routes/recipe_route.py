@@ -62,11 +62,10 @@ async def create_recipe(recipe_data: Recipe = Body(...), user_id: str = Depends(
             return SuccessOut(message="Recipe created successfully", payload={"recipe_id": recipe_id})
         else:
             return ErrorOut(message="Failed to create the recipe")
-                
+        
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail=ErrorOut(message=str(e)).model_dump())
-
 
 @router.post("/update/{id}", response_model=SuccessOut)
 async def update_recipe(recipe_id: str, recipe_data: Recipe = Body(...), user_id: str = Depends(validate_token)
@@ -111,13 +110,16 @@ async def update_recipe(recipe_id: str, recipe_data: Recipe = Body(...), user_id
                 return ErrorOut(message="Failed to delete cloud images")
             else:
                 return ErrorOut(message="Failed to update the recipe")
-            
-    except UnauthorisedRecipeModificationException as e:
+                       
+    except InvalidRecipeIDException as e:
         print(e)
-        raise HTTPException(status_code=403, detail=ErrorOut(message=str(e)).model_dump())
+        raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
     except RecipeNotFoundException as e:
         print(e)
         raise HTTPException(status_code=404, detail=ErrorOut(message=str(e)).model_dump())
+    except UnauthorisedRecipeModificationException as e:
+        print(e)
+        raise HTTPException(status_code=403, detail=ErrorOut(message=str(e)).model_dump())
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail=ErrorOut(message=str(e)).model_dump())
@@ -153,12 +155,15 @@ async def delete_recipe(recipe_id: str, user_id: str = Depends(validate_token)
         else:
             return ErrorOut(message="Failed to delete the recipe")
         
-    except UnauthorisedRecipeModificationException as e:
+    except InvalidRecipeIDException as e:
         print(e)
-        raise HTTPException(status_code=403, detail=ErrorOut(message=str(e)).model_dump())
+        raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
     except RecipeNotFoundException as e:
         print(e)
         raise HTTPException(status_code=404, detail=ErrorOut(message=str(e)).model_dump())
+    except UnauthorisedRecipeModificationException as e:
+        print(e)
+        raise HTTPException(status_code=403, detail=ErrorOut(message=str(e)).model_dump())
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail=ErrorOut(message=str(e)).model_dump())

@@ -5,7 +5,8 @@ from models.response import ErrorOut
 from utils.validator import *
 from utils.annotations import PydanticObjectId
 from api.routes.file_route import is_valid_cloudinary_image
-import datetime
+from exceptions.recipe_exceptions import *
+from datetime import datetime
 
 class Recipe(BaseModel):
     recipe_name: str
@@ -140,9 +141,9 @@ class RecipeDatabaseIn(BaseModel):
     servings: int
     image_files: List[str]
     created_by: PydanticObjectId
-    created_date: datetime.datetime
+    created_date: datetime
     last_updated_by: PydanticObjectId
-    last_updated_date: datetime.datetime
+    last_updated_date: datetime
 
     @validator("recipe_name")
     def validate_recipe_name(cls, value):
@@ -268,9 +269,9 @@ class RecipeDatabaseOut(BaseModel):
     servings: int
     image_files: List[str]
     created_by: PydanticObjectId
-    created_date: datetime.datetime
+    created_date: datetime
     last_updated_by: PydanticObjectId
-    last_updated_date: datetime.datetime
+    last_updated_date: datetime
 
 class RecipeDatabaseUpdate(BaseModel):
     recipe_id: str
@@ -283,7 +284,7 @@ class RecipeDatabaseUpdate(BaseModel):
     servings: int
     image_files: List[str]
     last_updated_by: PydanticObjectId
-    last_updated_date: datetime.datetime
+    last_updated_date: datetime
 
     @validator("recipe_id")
     def validate_recipe_id(cls, value):
