@@ -11,17 +11,15 @@ pipeline {
         
         stage('Docker Push Stable Backup') {
             steps {
-                echo 'Pushing stable container'
-                // Add test steps here
-                sh '''
-                    docker tag registry.hub.docker.com/clementtyh/dishswap-backend:latest clementtyh/dishswap-backend:stable
-                '''
+                echo 'Pushing Stable Build'
                 script {
-                    // Log in to Docker Hub
+                    def dockerTag = "clementtyh/dishswap-backend:b0.${BUILD_ID}"
+        
+                    sh "docker tag registry.hub.docker.com/clementtyh/dishswap-backend:latest ${dockerTag}"
+        
+                    // Log in to Docker Hub and push the image
                     docker.withRegistry('https://registry.hub.docker.com', 'fd312ca4-a214-47f0-bff0-453e4b3ed27d') {
-                        // This block runs with Docker authentication
-                        // You can push and pull Docker images here
-                        docker.image('clementtyh/dishswap-backend:stable').push()
+                        docker.image("${dockerTag}").push()
                     }
                 }
             }
@@ -80,7 +78,7 @@ pipeline {
         
         stage('Docker Push Latest Backup') {
             steps {
-                echo 'Pushing Latest Container'
+                echo 'Pushing Latest Build'
                 script {
                     // Log in to Docker Hub
                     docker.withRegistry('https://registry.hub.docker.com', 'fd312ca4-a214-47f0-bff0-453e4b3ed27d') {
