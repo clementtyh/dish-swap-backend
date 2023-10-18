@@ -32,7 +32,6 @@ pipeline {
                 echo 'Building Container'
                 // Add deploy steps here
                 sh '''
-                    docker-compose down
                     docker-compose build --no-cache
                 '''
             }
@@ -53,7 +52,7 @@ pipeline {
             }
         }
         
-        stage('Manual Approval') {
+        stage('Approve Deployment') {
             steps {
                 script {
                     // Define the path for the scan.log file with a timestamp
@@ -73,6 +72,7 @@ pipeline {
                 echo 'Deploying'
                 // Add deploy steps here
                 sh '''
+                    docker-compose down
                     docker-compose up -d
                 '''
             }
