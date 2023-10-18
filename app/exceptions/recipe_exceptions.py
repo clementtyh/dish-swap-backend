@@ -12,3 +12,8 @@ class RecipeAlreadyExistsException(Exception):
     def __init__(self, name):
         self.name = name
         super().__init__(f"Recipe with the given name '{name}' already exists")
+
+class UnauthorisedRecipeModificationException(Exception):
+    def __init__(self, name):
+        self.name = name
+        super().__init__(f"User is not authorised to modify/delete this recipe '{name}'")
