@@ -232,6 +232,7 @@ class RecipeDatabaseUpdate(BaseModel):
     
     @validator("image_files")
     def validate_image_files(cls, value):
+        validate_max_images(FieldName.IMAGE_FILES.value, len(value), max_count=2)
         for image_url in value:
             validate_required(FieldName.IMAGE_FILES.value, image_url)
             validate_invalid(FieldName.IMAGE_FILES.value, image_url, validate_func=is_valid_cloudinary_image)
