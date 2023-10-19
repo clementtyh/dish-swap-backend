@@ -40,16 +40,16 @@ async def get_upload_url(user_id: str = Depends(validate_token)):
     
 
 def is_valid_cloudinary_image(image_url):
-    if not image_url:
-        return False
-    
-    public_id_match = re.search(r'/v\d+/(.*?)(\.\w+)?$', image_url)
-    public_id = public_id_match.group(1) if public_id_match else None
+    try:
+        if not image_url:
+            return False
+        
+        public_id_match = re.search(r'/v\d+/(.*?)(\.\w+)?$', image_url)
+        public_id = public_id_match.group(1) if public_id_match else None
 
-    if public_id:
-        cloudinary_url = cloudinary.utils.cloudinary_url(public_id)[0]
-    
-        try:
+        if public_id:
+            cloudinary_url = cloudinary.utils.cloudinary_url(public_id)[0]
+        
             response = requests.get(cloudinary_url, stream=True)
             if response.status_code == 200:
                 content_length = int(response.headers.get("Content-Length"))
@@ -59,10 +59,10 @@ def is_valid_cloudinary_image(image_url):
                     return True
             else:
                 return False
-        except Exception as e:
-            print(e)
-            return False
-    return False
+            
+    except Exception as e:
+        print(e)
+        return False
 
 async def delete_cloudinary_images(image_urls):
     try:

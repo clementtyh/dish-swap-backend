@@ -6,6 +6,18 @@ from utils.validator import *
 from utils.annotations import PydanticObjectId
 from api.routes.file_route import is_valid_cloudinary_image
 from datetime import datetime
+from enum import Enum
+
+class FieldName(Enum):
+    RECIPE_ID = "Recipe ID"
+    RECIPE_NAME = "Recipe name"
+    RECIPE_DESCRIPTION = "Description"
+    INGREDIENT = "Ingredient"
+    STEP = "Step"
+    TOTAL_TIME = "Total time"
+    DIFFICULTY = "Difficulty"
+    SERVINGS = "Servings"
+    IMAGE_FILES = "Image file"
 
 class Recipe(BaseModel):
     recipe_name: str
@@ -19,115 +31,56 @@ class Recipe(BaseModel):
 
     @validator("recipe_name")
     def validate_recipe_name(cls, value):
-        if value is None or not value.strip():
-            raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message="Recipe name is required").model_dump())        
-        if not validate_recipe_name(value):
-            raise HTTPException(
-                status_code=400, 
-                detail=ErrorOut(message=f"Invalid recipe name '{value}'").model_dump())
+        validate_required(FieldName.RECIPE_NAME.value, value)
+        validate_invalid(FieldName.RECIPE_NAME.value, value, validate_func=validate_recipe_name)
         return value
 
     @validator("recipe_description")
     def validate_recipe_description(cls, value):
-        if value is None or not value.strip():
-            raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message="Description is required").model_dump())
-        if not validate_description(value):
-            raise HTTPException(
-                status_code=400, 
-                detail=ErrorOut(message=f"Invalid description '{value}'").model_dump())
+        validate_required(FieldName.RECIPE_DESCRIPTION.value, value)
+        validate_invalid(FieldName.RECIPE_DESCRIPTION.value, value, validate_func=validate_description)
         return value
 
     @validator("ingredients")
     def validate_ingredients(cls, value):
-        if not value or all(ingredient is None or not ingredient.strip() for ingredient in value):
-            raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message="Ingredient is required").model_dump())   
         for ingredient in value:
-            if not validate_ingredient(ingredient):
-                raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message=f"Invalid ingredient '{ingredient}'").model_dump())
+            validate_required(FieldName.INGREDIENT.value, ingredient)
+            validate_invalid(FieldName.INGREDIENT.value, ingredient, validate_func=validate_ingredient)
         return value
 
     @validator("steps")
     def validate_steps(cls, value):
-        if not value or all(step is None or not step.strip() for step in value):
-            raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message="Step is required").model_dump())   
         for step in value:
-            if not validate_step(step):
-                raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message=f"Invalid step '{step}'").model_dump())
+            validate_required(FieldName.STEP.value, step)
+            validate_invalid(FieldName.STEP.value, step, validate_func=validate_step)
         return value
 
     @validator("total_time")
     def validate_total_time(cls, value):
-        if value is None or not str(value).strip():
-            raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message="Total time is required").model_dump())
-        try:
-            total_time = int(value)
-        except ValueError:
-            raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message="Total time must be a valid integer").model_dump()
-            ) 
-        if not validate_total_time(str(total_time)):
-            raise HTTPException(
-                status_code=400, 
-                detail=ErrorOut(message=f"Invalid total time '{total_time}'").model_dump())
+        validate_required_integer(FieldName.TOTAL_TIME.value, value)
+        total_time = validate_integer(FieldName.TOTAL_TIME.value, value)
+        validate_invalid(FieldName.TOTAL_TIME.value, str(total_time), validate_func=validate_total_time)
         return total_time
-
+    
     @validator("difficulty")
     def validate_difficulty(cls, value):
-        if value is None or not value.strip():
-            raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message="Difficulty is required").model_dump())   
-        if not validate_difficulty(value):
-            raise HTTPException(
-                status_code=400, 
-                detail=ErrorOut(message=f"Invalid difficulty '{value}'").model_dump())
+        validate_required(FieldName.DIFFICULTY.value, value)
+        validate_invalid(FieldName.DIFFICULTY.value, value, validate_func=validate_difficulty)
         return value
-
+    
     @validator("servings")
     def validate_servings(cls, value):
-        if value is None or not str(value).strip():
-            raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message="Servings is required").model_dump()) 
-        try:
-            servings = int(value)
-        except ValueError:
-            raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message="Servings must be a valid integer").model_dump()
-            )
-        if not validate_servings(str(servings)):
-            raise HTTPException(
-                status_code=400, 
-                detail=ErrorOut(message=f"Invalid servings '{servings}'").model_dump())
+        validate_required_integer(FieldName.SERVINGS.value, value)
+        servings = validate_integer(FieldName.SERVINGS.value, value)
+        validate_invalid(FieldName.SERVINGS.value, str(servings), validate_func=validate_servings)
         return servings
     
     @validator("image_files")
     def validate_image_files(cls, value):
-        if not value or all(image_url is None or not image_url.strip() for image_url in value):
-            raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message="Image file is required").model_dump()) 
+        validate_max_images(FieldName.IMAGE_FILES.value, len(value), max_count=2)
         for image_url in value:
-            if not is_valid_cloudinary_image(image_url):
-                raise HTTPException(
-                    status_code=400,
-                    detail=ErrorOut(message=f"Invalid image url '{image_url}'").model_dump())
+            validate_required(FieldName.IMAGE_FILES.value, image_url)
+            validate_invalid(FieldName.IMAGE_FILES.value, image_url, validate_func=is_valid_cloudinary_image)
         return value
 
 class RecipeDatabaseIn(BaseModel):
@@ -146,115 +99,56 @@ class RecipeDatabaseIn(BaseModel):
 
     @validator("recipe_name")
     def validate_recipe_name(cls, value):
-        if value is None or not value.strip():
-            raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message="Recipe name is required").model_dump())        
-        if not validate_recipe_name(value):
-            raise HTTPException(
-                status_code=400, 
-                detail=ErrorOut(message=f"Invalid recipe name '{value}'").model_dump())
+        validate_required(FieldName.RECIPE_NAME.value, value)
+        validate_invalid(FieldName.RECIPE_NAME.value, value, validate_func=validate_recipe_name)
         return value
 
     @validator("recipe_description")
     def validate_recipe_description(cls, value):
-        if value is None or not value.strip():
-            raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message="Description is required").model_dump())
-        if not validate_description(value):
-            raise HTTPException(
-                status_code=400, 
-                detail=ErrorOut(message=f"Invalid description '{value}'").model_dump())
+        validate_required(FieldName.RECIPE_DESCRIPTION.value, value)
+        validate_invalid(FieldName.RECIPE_DESCRIPTION.value, value, validate_func=validate_description)
         return value
 
     @validator("ingredients")
     def validate_ingredients(cls, value):
-        if not value or all(ingredient is None or not ingredient.strip() for ingredient in value):
-            raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message="Ingredient is required").model_dump())   
         for ingredient in value:
-            if not validate_ingredient(ingredient):
-                raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message=f"Invalid ingredient '{ingredient}'").model_dump())
+            validate_required(FieldName.INGREDIENT.value, ingredient)
+            validate_invalid(FieldName.INGREDIENT.value, ingredient, validate_func=validate_ingredient)
         return value
 
     @validator("steps")
     def validate_steps(cls, value):
-        if not value or all(step is None or not step.strip() for step in value):
-            raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message="Step is required").model_dump())   
         for step in value:
-            if not validate_step(step):
-                raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message=f"Invalid step '{step}'").model_dump())
+            validate_required(FieldName.STEP.value, step)
+            validate_invalid(FieldName.STEP.value, step, validate_func=validate_step)
         return value
 
     @validator("total_time")
     def validate_total_time(cls, value):
-        if value is None or not str(value).strip():
-            raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message="Total time is required").model_dump())
-        try:
-            total_time = int(value)
-        except ValueError:
-            raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message="Total time must be a valid integer").model_dump()
-            ) 
-        if not validate_total_time(str(total_time)):
-            raise HTTPException(
-                status_code=400, 
-                detail=ErrorOut(message=f"Invalid total time '{total_time}'").model_dump())
+        validate_required_integer(FieldName.TOTAL_TIME.value, value)
+        total_time = validate_integer(FieldName.TOTAL_TIME.value, value)
+        validate_invalid(FieldName.TOTAL_TIME.value, str(total_time), validate_func=validate_total_time)
         return total_time
-
+    
     @validator("difficulty")
     def validate_difficulty(cls, value):
-        if value is None or not value.strip():
-            raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message="Difficulty is required").model_dump())   
-        if not validate_difficulty(value):
-            raise HTTPException(
-                status_code=400, 
-                detail=ErrorOut(message=f"Invalid difficulty '{value}'").model_dump())
+        validate_required(FieldName.DIFFICULTY.value, value)
+        validate_invalid(FieldName.DIFFICULTY.value, value, validate_func=validate_difficulty)
         return value
-
+    
     @validator("servings")
     def validate_servings(cls, value):
-        if value is None or not str(value).strip():
-            raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message="Servings is required").model_dump()) 
-        try:
-            servings = int(value)
-        except ValueError:
-            raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message="Servings must be a valid integer").model_dump()
-            )
-        if not validate_servings(str(servings)):
-            raise HTTPException(
-                status_code=400, 
-                detail=ErrorOut(message=f"Invalid servings '{servings}'").model_dump())
+        validate_required_integer(FieldName.SERVINGS.value, value)
+        servings = validate_integer(FieldName.SERVINGS.value, value)
+        validate_invalid(FieldName.SERVINGS.value, str(servings), validate_func=validate_servings)
         return servings
     
     @validator("image_files")
     def validate_image_files(cls, value):
-        if not value or all(image_url is None or not image_url.strip() for image_url in value):
-            raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message="Image file is required").model_dump()) 
+        validate_max_images(FieldName.IMAGE_FILES.value, len(value), max_count=2)
         for image_url in value:
-            if not is_valid_cloudinary_image(image_url):
-                raise HTTPException(
-                    status_code=400,
-                    detail=ErrorOut(message=f"Invalid image url '{image_url}'").model_dump())
+            validate_required(FieldName.IMAGE_FILES.value, image_url)
+            validate_invalid(FieldName.IMAGE_FILES.value, image_url, validate_func=is_valid_cloudinary_image)
         return value
     
 class RecipeDatabaseOut(BaseModel):
@@ -287,121 +181,58 @@ class RecipeDatabaseUpdate(BaseModel):
 
     @validator("recipe_id")
     def validate_recipe_id(cls, value):
-        if value is None or not value.strip():
-            raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message="Recipe ID is required").model_dump())
+        validate_required(FieldName.RECIPE_ID.value, value)
         return value
     
     @validator("recipe_name")
     def validate_recipe_name(cls, value):
-        if value is None or not value.strip():
-            raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message="Recipe name is required").model_dump())        
-        if not validate_recipe_name(value):
-            raise HTTPException(
-                status_code=400, 
-                detail=ErrorOut(message=f"Invalid recipe name '{value}'").model_dump())
+        validate_required(FieldName.RECIPE_NAME.value, value)
+        validate_invalid(FieldName.RECIPE_NAME.value, value, validate_func=validate_recipe_name)
         return value
 
     @validator("recipe_description")
     def validate_recipe_description(cls, value):
-        if value is None or not value.strip():
-            raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message="Description is required").model_dump())
-        if not validate_description(value):
-            raise HTTPException(
-                status_code=400, 
-                detail=ErrorOut(message=f"Invalid description '{value}'").model_dump())
+        validate_required(FieldName.RECIPE_DESCRIPTION.value, value)
+        validate_invalid(FieldName.RECIPE_DESCRIPTION.value, value, validate_func=validate_description)
         return value
 
     @validator("ingredients")
     def validate_ingredients(cls, value):
-        if not value or all(ingredient is None or not ingredient.strip() for ingredient in value):
-            raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message="Ingredient is required").model_dump())   
         for ingredient in value:
-            if not validate_ingredient(ingredient):
-                raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message=f"Invalid ingredient '{ingredient}'").model_dump())
+            validate_required(FieldName.INGREDIENT.value, ingredient)
+            validate_invalid(FieldName.INGREDIENT.value, ingredient, validate_func=validate_ingredient)
         return value
 
     @validator("steps")
     def validate_steps(cls, value):
-        if not value or all(step is None or not step.strip() for step in value):
-            raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message="Step is required").model_dump())   
         for step in value:
-            if not validate_step(step):
-                raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message=f"Invalid step '{step}'").model_dump())
+            validate_required(FieldName.STEP.value, step)
+            validate_invalid(FieldName.STEP.value, step, validate_func=validate_step)
         return value
 
     @validator("total_time")
     def validate_total_time(cls, value):
-        if value is None or not str(value).strip():
-            raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message="Total time is required").model_dump())
-        try:
-            total_time = int(value)
-        except ValueError:
-            raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message="Total time must be a valid integer").model_dump()
-            ) 
-        if not validate_total_time(str(total_time)):
-            raise HTTPException(
-                status_code=400, 
-                detail=ErrorOut(message=f"Invalid total time '{total_time}'").model_dump())
+        validate_required_integer(FieldName.TOTAL_TIME.value, value)
+        total_time = validate_integer(FieldName.TOTAL_TIME.value, value)
+        validate_invalid(FieldName.TOTAL_TIME.value, str(total_time), validate_func=validate_total_time)
         return total_time
-
+    
     @validator("difficulty")
     def validate_difficulty(cls, value):
-        if value is None or not value.strip():
-            raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message="Difficulty is required").model_dump())   
-        if not validate_difficulty(value):
-            raise HTTPException(
-                status_code=400, 
-                detail=ErrorOut(message=f"Invalid difficulty '{value}'").model_dump())
+        validate_required(FieldName.DIFFICULTY.value, value)
+        validate_invalid(FieldName.DIFFICULTY.value, value, validate_func=validate_difficulty)
         return value
-
+    
     @validator("servings")
     def validate_servings(cls, value):
-        if value is None or not str(value).strip():
-            raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message="Servings is required").model_dump()) 
-        try:
-            servings = int(value)
-        except ValueError:
-            raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message="Servings must be a valid integer").model_dump()
-            )
-        if not validate_servings(str(servings)):
-            raise HTTPException(
-                status_code=400, 
-                detail=ErrorOut(message=f"Invalid servings '{servings}'").model_dump())
+        validate_required_integer(FieldName.SERVINGS.value, value)
+        servings = validate_integer(FieldName.SERVINGS.value, value)
+        validate_invalid(FieldName.SERVINGS.value, str(servings), validate_func=validate_servings)
         return servings
     
     @validator("image_files")
     def validate_image_files(cls, value):
-        if not value or all(image_url is None or not image_url.strip() for image_url in value):
-            raise HTTPException(
-                status_code=400,
-                detail=ErrorOut(message="Image file is required").model_dump()) 
         for image_url in value:
-            if not is_valid_cloudinary_image(image_url):
-                raise HTTPException(
-                    status_code=400,
-                    detail=ErrorOut(message=f"Invalid image url '{image_url}'").model_dump())
+            validate_required(FieldName.IMAGE_FILES.value, image_url)
+            validate_invalid(FieldName.IMAGE_FILES.value, image_url, validate_func=is_valid_cloudinary_image)
         return value
