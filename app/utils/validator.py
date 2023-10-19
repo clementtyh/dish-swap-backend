@@ -135,9 +135,10 @@ def validate_invalid(field_name, value, validate_func=None):
             detail=ErrorOut(message=f"Invalid {field_name} '{value}'").model_dump()
         )
     
-def validate_max_images(field_name, value, max_count):
-    if not validate_max_length(value, max_count):
+def validate_max_images(field_name, value):
+    max_image_count = 15
+    if not validate_max_length(value, max_image_count):
         raise HTTPException(
             status_code=400,
-            detail=ErrorOut(message=f"Exceeded maximum {field_name} count of {max_count}").model_dump()
+            detail=ErrorOut(message=f"Exceeded maximum {field_name} count of {max_image_count}").model_dump()
         )

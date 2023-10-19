@@ -1,7 +1,5 @@
 from pydantic import BaseModel, validator, Field
-from fastapi import HTTPException
 from typing import List, Union
-from models.response import ErrorOut
 from utils.validator import *
 from utils.annotations import PydanticObjectId
 from api.routes.file_route import is_valid_cloudinary_image
@@ -77,7 +75,7 @@ class Recipe(BaseModel):
     
     @validator("image_files")
     def validate_image_files(cls, value):
-        validate_max_images(FieldName.IMAGE_FILES.value, len(value), max_count=2)
+        validate_max_images(FieldName.IMAGE_FILES.value, len(value))
         for image_url in value:
             validate_required(FieldName.IMAGE_FILES.value, image_url)
             validate_invalid(FieldName.IMAGE_FILES.value, image_url, validate_func=is_valid_cloudinary_image)
@@ -145,7 +143,7 @@ class RecipeDatabaseIn(BaseModel):
     
     @validator("image_files")
     def validate_image_files(cls, value):
-        validate_max_images(FieldName.IMAGE_FILES.value, len(value), max_count=2)
+        validate_max_images(FieldName.IMAGE_FILES.value, len(value))
         for image_url in value:
             validate_required(FieldName.IMAGE_FILES.value, image_url)
             validate_invalid(FieldName.IMAGE_FILES.value, image_url, validate_func=is_valid_cloudinary_image)
@@ -232,7 +230,7 @@ class RecipeDatabaseUpdate(BaseModel):
     
     @validator("image_files")
     def validate_image_files(cls, value):
-        validate_max_images(FieldName.IMAGE_FILES.value, len(value), max_count=2)
+        validate_max_images(FieldName.IMAGE_FILES.value, len(value))
         for image_url in value:
             validate_required(FieldName.IMAGE_FILES.value, image_url)
             validate_invalid(FieldName.IMAGE_FILES.value, image_url, validate_func=is_valid_cloudinary_image)
