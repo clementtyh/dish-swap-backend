@@ -28,6 +28,8 @@ pipeline {
                 echo 'Testing...'
                 // Add test steps here
                 script {
+                    sh 'export JWT_PUBLIC_KEY_PATH="/home/kiriko/dishswap_keys/public_key.pem"'
+                    sh 'export JWT_PRIVATE_KEY_PATH="/home/kiriko/dishswap_keys/private_key.pem"'
                     // Activate the virtual environment
                     sh './venv/bin/activate'
 
