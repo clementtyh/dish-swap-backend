@@ -34,6 +34,7 @@ pipeline {
 
                 script {
                     // Activate the virtual environment
+                    sh 'printenv'
                     sh './venv/bin/activate'
 
                     sh './venv/bin/pytest'
