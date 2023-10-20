@@ -18,7 +18,7 @@ pipeline {
                     // Upgrade pip within the virtual environment
                     sh './venv/bin/pip install --upgrade pip'
 
-                    sh 'pip install -r requirements.txt'
+                    sh './venv/bin/pip install -r requirements.txt'
                 }
             }
         }
