@@ -1,5 +1,6 @@
 import re
-from datetime import datetime
+from fastapi import HTTPException
+from models.response import ErrorOut
 
 def validate_password(value: str):
     password_pattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
@@ -105,3 +106,39 @@ def validate_max_length(value: int, max_length: int):
 
 def validate_length_range(value: str, min_length: int, max_length: int):
     return min_length <= len(value) <= max_length
+
+def validate_required(field_name, value):
+    if not value or all(field_name is None or not field_name.strip() for field_name in value):
+        raise HTTPException(
+            status_code=400,
+            detail=ErrorOut(message=f"{field_name} is required").model_dump())
+
+def validate_required_integer(field_name, value):
+    if value is None or not str(value).strip():
+        raise HTTPException(
+            status_code=400,
+            detail=ErrorOut(message=f"{field_name} is required").model_dump())
+
+def validate_integer(field_name, value):
+    try:
+        return int(value)
+    except ValueError:
+        raise HTTPException(
+            status_code=400,
+            detail=ErrorOut(message=f"{field_name} must be a valid integer").model_dump()
+        )
+
+def validate_invalid(field_name, value, validate_func=None):
+    if validate_func and not validate_func(value):
+        raise HTTPException(
+            status_code=400, 
+            detail=ErrorOut(message=f"Invalid {field_name} '{value}'").model_dump()
+        )
+    
+def validate_max_images(field_name, value):
+    max_image_count = 15
+    if not validate_max_length(value, max_image_count):
+        raise HTTPException(
+            status_code=400,
+            detail=ErrorOut(message=f"Exceeded maximum {field_name} count of {max_image_count}").model_dump()
+        )
