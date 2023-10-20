@@ -31,7 +31,7 @@ pipeline {
                     // Activate the virtual environment
                     sh './venv/bin/activate'
 
-                    sh 'pytest'
+                    sh './venv/bin/pytest'
                 }
             }
         }
