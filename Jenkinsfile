@@ -25,8 +25,8 @@ pipeline {
 
         stage('Unit Test') {
             environment {
-                    JWT_PUBLIC_KEY_PATH = "/home/kiriko/dishswap_keys/public_key.pem"
-                    JWT_PRIVATE_KEY_PATH = "/home/kiriko/dishswap_keys/private_key.pem"
+                    JWT_PUBLIC_KEY_PATH = "/var/lib/jenkins/keys/public_key.pem"
+                    JWT_PRIVATE_KEY_PATH = "/var/lib/jenkins/keys/private_key.pem"
             }
             steps {
                 echo 'Testing...'
