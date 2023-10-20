@@ -6,13 +6,6 @@ pipeline {
             steps {
                 echo 'Building...'
                 // Add test steps here
-                sh '''
-                    python3 -m venv venv
-                    sudo chmod +x ./venv/bin/activate
-                    ./venv/bin/activate
-                    pip install --upgrade pip
-                    pip install -r requirements.txt
-                '''
                 script {
                     // Set up the virtual environment
                     sh 'python3 -m venv venv'
