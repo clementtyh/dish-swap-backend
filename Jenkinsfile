@@ -2,10 +2,26 @@ pipeline {
     agent any
 
     stages {
-        stage('Test') {
+        stage('Building Test Environment') {
             steps {
-                echo 'Testing'
+                echo 'Building...'
                 // Add test steps here
+                sh '''
+                    python3 -m venv venv
+                    source ./venv/bin/activate
+                    pip install --upgrade pip
+                    pip install -r requirements.txt
+                '''
+            }
+        }
+
+        stage('Unit Test') {
+            steps {
+                echo 'Testing...'
+                // Add test steps here
+                sh '''
+                    pytest
+                '''
             }
         }
         
