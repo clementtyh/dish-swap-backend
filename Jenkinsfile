@@ -24,13 +24,14 @@ pipeline {
         }
 
         stage('Unit Test') {
+            environment {
+                    JWT_PUBLIC_KEY_PATH = "/home/kiriko/dishswap_keys/public_key.pem"
+                    JWT_PRIVATE_KEY_PATH = "/home/kiriko/dishswap_keys/private_key.pem"
+            }
             steps {
                 echo 'Testing...'
                 // Add test steps here
-                environment {
-                    JWT_PUBLIC_KEY_PATH = "/home/kiriko/dishswap_keys/public_key.pem"
-                    JWT_PRIVATE_KEY_PATH = "/home/kiriko/dishswap_keys/private_key.pem"
-                }
+
                 script {
                     // Activate the virtual environment
                     sh './venv/bin/activate'
