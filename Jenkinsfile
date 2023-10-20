@@ -13,6 +13,20 @@ pipeline {
                     pip install --upgrade pip
                     pip install -r requirements.txt
                 '''
+                script {
+                    // Set up the virtual environment
+                    sh 'python3 -m venv venv'
+
+                    sh 'sudo chmod +x ./venv/bin/activate'
+
+                    // Activate the virtual environment
+                    sh 'source ./venv/bin/activate'
+
+                    // Upgrade pip within the virtual environment
+                    sh './venv/bin/pip install --upgrade pip'
+
+                    sh 'pip install -r requirements.txt'
+                }
             }
         }
 
