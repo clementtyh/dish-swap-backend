@@ -13,7 +13,7 @@ pipeline {
                     sh 'sudo chmod +x ./venv/bin/activate'
 
                     // Activate the virtual environment
-                    sh 'source ./venv/bin/activate'
+                    sh './venv/bin/activate'
 
                     // Upgrade pip within the virtual environment
                     sh './venv/bin/pip install --upgrade pip'
