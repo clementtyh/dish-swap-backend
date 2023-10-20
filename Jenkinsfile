@@ -27,9 +27,12 @@ pipeline {
             steps {
                 echo 'Testing...'
                 // Add test steps here
-                sh '''
-                    pytest
-                '''
+                script {
+                    // Activate the virtual environment
+                    sh './venv/bin/activate'
+
+                    sh 'pytest'
+                }
             }
         }
         
