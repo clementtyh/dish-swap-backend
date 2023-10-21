@@ -34,7 +34,8 @@ async def login(user_login: UserLogin  = Body(...)):
         token = create_token({"id": user_info.id}, minutes_to_expire)
 
         payload = {
-            "token": token
+            "token": token, 
+            "displayName": user_info.display_name,
         }
 
         response = SuccessOut(message="Login successful", payload=payload)
