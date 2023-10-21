@@ -66,7 +66,7 @@ async def create_recipe(recipe_data: Recipe = Body(...), user_id: str = Depends(
         print(e)
         raise HTTPException(status_code=500, detail=ErrorOut(message=str(e)).model_dump())
 
-@router.post("/update/{id}", response_model=SuccessOut)
+@router.post("/update/{recipe_id}", response_model=SuccessOut)
 async def update_recipe(recipe_id: str, recipe_data: Recipe = Body(...), user_id: str = Depends(validate_token)
 ):
     try:
@@ -123,7 +123,7 @@ async def update_recipe(recipe_id: str, recipe_data: Recipe = Body(...), user_id
         print(e)
         raise HTTPException(status_code=500, detail=ErrorOut(message=str(e)).model_dump())
     
-@router.post("/delete/{id}", response_model=SuccessOut)
+@router.post("/delete/{recipe_id}", response_model=SuccessOut)
 async def delete_recipe(recipe_id: str, user_id: str = Depends(validate_token)
 ):
     try:
