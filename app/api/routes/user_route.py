@@ -4,6 +4,7 @@ from models.response import SuccessOut, ErrorOut
 from models.user import UserRegister, UserDatabaseIn
 
 from utils.hasher import hash_password
+from utils.logger import SingletonLogger
 
 from services.user_services import create_user, check_passwords, check_user_exist
 
@@ -11,6 +12,7 @@ from exceptions.user_exceptions import UserAlreadyExistsException, PasswordsDoNo
 
 
 router = APIRouter()
+logger = SingletonLogger()
 
 
 @router.get("/")
@@ -34,11 +36,11 @@ async def register(user_register: UserRegister  = Body(...)):
         return SuccessOut()
     
     except UserAlreadyExistsException as e:
-        # Log e
+        logger.info(e)
         raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
     except PasswordsDoNotMatchException as e:
-        # Log e
+        logger.info(e)
         raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
     except Exception as e:
-        print(e)
-        raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
+        logger.error(e)
+        raise HTTPException(status_code=400, detail=ErrorOut(message="An unknown error has occurred").model_dump())

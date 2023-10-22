@@ -3,8 +3,12 @@ from typing import List
 from services.review_services import get_reviews
 from models.response import ErrorOut
 from models.review import ReviewDatabaseOut
+from utils.logger import SingletonLogger
+
 
 router = APIRouter()
+logger = SingletonLogger()
+
 
 @router.get("/", response_model=List[ReviewDatabaseOut])
 async def root(response: Response, page=1, recipe=""):
@@ -15,5 +19,5 @@ async def root(response: Response, page=1, recipe=""):
         return result["reviews"]
 
     except Exception as e:
-        print(e)
-        raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
+        logger.error(e)
+        raise HTTPException(status_code=400, detail=ErrorOut(message="An unknown error has occurred").model_dump())
