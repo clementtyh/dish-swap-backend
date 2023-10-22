@@ -7,6 +7,9 @@ WORKDIR .
 # Copy the current directory contents into the container at /app
 COPY . .
 
+# Run pip upgrade
+RUN pip install --upgrade pip
+
 # If you have additional dependencies in a requirements.txt file, you can include the next line
 RUN pip install --no-cache-dir -r requirements.txt
 
