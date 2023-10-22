@@ -19,6 +19,10 @@ class SingletonLogger:
                 stream_handler = logging.StreamHandler()
                 stream_handler.setFormatter(formatter)
 
+                # Check if the log folder exists, and create it if not
+                if not os.path.exists(cls._log_folder):
+                    os.makedirs(cls._log_folder)
+
                 file_handler = logging.FileHandler(f'{cls._log_folder}/application.log')
                 file_handler.setFormatter(formatter)
 
