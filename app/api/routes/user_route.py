@@ -57,7 +57,7 @@ async def update_password(user_change_password: UserChangePassword  = Body(...),
             
         validate_password(challenge_password, user_info.hashed_password)
         
-        new_hashed_password  = hash_password(new_password)
+        new_hashed_password = hash_password(new_password)
 
         await update_password_by_id(user_id, new_hashed_password)
 
