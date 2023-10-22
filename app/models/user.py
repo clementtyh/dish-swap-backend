@@ -58,6 +58,7 @@ class UserDatabaseOut(BaseModel):
     id: str = Field(alias="_id")
     hashed_password: str
     user_type: str
+    display_name: str
 
 
     
