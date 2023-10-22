@@ -2,7 +2,6 @@ import os
 import logging
 import threading
 
-
 class SingletonLogger:
     _instance_lock = threading.Lock()
     _logger_instance = None
@@ -42,3 +41,5 @@ class SingletonLogger:
 
     def critical(self, message):
         self.logger.critical(message)
+
+logger = SingletonLogger()

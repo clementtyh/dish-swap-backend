@@ -3,11 +3,10 @@ from typing import List
 from services.review_services import get_reviews
 from models.response import ErrorOut
 from models.review import ReviewDatabaseOut
-from utils.logger import SingletonLogger
+from utils.logger import logger
 
 
 router = APIRouter()
-logger = SingletonLogger()
 
 
 @router.get("/", response_model=List[ReviewDatabaseOut])

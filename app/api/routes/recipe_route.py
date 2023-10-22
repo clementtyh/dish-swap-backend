@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Body, Response, Depends
 from typing import List
 from services.auth_services import validate_token
-from utils.logger import SingletonLogger
+from utils.logger import logger
 from services.recipe_services import *
 from services.review_services import delete_recipe_reviews, get_reviews_count
 from services.flavourmark_services import delete_recipe_flavourmarks, get_flavourmarks_count
@@ -13,7 +13,6 @@ from api.routes.file_route import delete_cloudinary_images
 
 
 router = APIRouter()
-logger = SingletonLogger()
 
 
 @router.get("/", response_model=List[RecipeDatabaseOut])

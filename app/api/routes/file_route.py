@@ -1,7 +1,7 @@
 from fastapi import HTTPException, APIRouter, Depends
 from services.auth_services import validate_token
 from utils.validator import validate_file_size
-from utils.logger import SingletonLogger
+from utils.logger import logger
 from models.response import ErrorOut
 import cloudinary
 import cloudinary.uploader
@@ -13,7 +13,6 @@ import requests
 
 
 router = APIRouter()
-logger = SingletonLogger()
 
 
 cloudinary_config_path = os.environ.get("CLOUDINARY_CONFIG_JSON")
