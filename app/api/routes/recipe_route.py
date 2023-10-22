@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Body, Response, Depends
 from typing import List
 from services.auth_services import validate_token
+from utils.logger import logger
 from services.recipe_services import *
 from services.review_services import delete_recipe_reviews, get_reviews_count
 from services.flavourmark_services import delete_recipe_flavourmarks, get_flavourmarks_count
@@ -10,7 +11,9 @@ from exceptions.recipe_exceptions import *
 from datetime import datetime
 from api.routes.file_route import delete_cloudinary_images
 
+
 router = APIRouter()
+
 
 @router.get("/", response_model=List[RecipeDatabaseOut])
 async def root(response: Response, page=1, search=""):
@@ -21,7 +24,7 @@ async def root(response: Response, page=1, search=""):
         return result["recipes"]
 
     except Exception as e:
-        print(e)
+        logger.error(e)
         raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
     
 @router.get("/{id}", response_model=RecipeDatabaseOut)
@@ -32,10 +35,10 @@ async def getOne(id):
         return recipe
 
     except RecipeNotFoundException as e:
-        print(e)
+        logger.info(e)
         raise HTTPException(status_code=404, detail=ErrorOut(message=str(e)).model_dump())
     except Exception as e:
-        print(e)
+        logger.error(e)
         raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
 
 @router.post("/create")
@@ -63,7 +66,7 @@ async def create_recipe(recipe_data: Recipe = Body(...), user_id: str = Depends(
             return ErrorOut(message="Failed to create the recipe")
         
     except Exception as e:
-        print(e)
+        logger.error(e)
         raise HTTPException(status_code=500, detail=ErrorOut(message=str(e)).model_dump())
 
 @router.post("/update/{recipe_id}", response_model=SuccessOut)
@@ -111,17 +114,17 @@ async def update_recipe(recipe_id: str, recipe_data: Recipe = Body(...), user_id
                 return ErrorOut(message="Failed to update the recipe")
                        
     except InvalidRecipeIDException as e:
-        print(e)
+        logger.info(e)
         raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
     except RecipeNotFoundException as e:
-        print(e)
+        logger.info(e)
         raise HTTPException(status_code=404, detail=ErrorOut(message=str(e)).model_dump())
     except UnauthorisedRecipeModificationException as e:
-        print(e)
+        logger.info(e)
         raise HTTPException(status_code=403, detail=ErrorOut(message=str(e)).model_dump())
     except Exception as e:
-        print(e)
-        raise HTTPException(status_code=500, detail=ErrorOut(message=str(e)).model_dump())
+        logger.error(e)
+        raise HTTPException(status_code=400, detail=ErrorOut(message="An unknown error has occurred").model_dump())
     
 @router.post("/delete/{recipe_id}", response_model=SuccessOut)
 async def delete_recipe(recipe_id: str, user_id: str = Depends(validate_token)
@@ -155,14 +158,14 @@ async def delete_recipe(recipe_id: str, user_id: str = Depends(validate_token)
             return ErrorOut(message="Failed to delete the recipe")
         
     except InvalidRecipeIDException as e:
-        print(e)
+        logger.info(e)
         raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
     except RecipeNotFoundException as e:
-        print(e)
+        logger.info(e)
         raise HTTPException(status_code=404, detail=ErrorOut(message=str(e)).model_dump())
     except UnauthorisedRecipeModificationException as e:
-        print(e)
+        logger.info(e)
         raise HTTPException(status_code=403, detail=ErrorOut(message=str(e)).model_dump())
     except Exception as e:
-        print(e)
-        raise HTTPException(status_code=500, detail=ErrorOut(message=str(e)).model_dump())
+        logger.error(e)
+        raise HTTPException(status_code=400, detail=ErrorOut(message="An unknown error has occurred").model_dump())

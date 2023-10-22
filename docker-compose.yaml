@@ -18,5 +18,7 @@ services:
       JWT_PUBLIC_KEY_PATH: "/secrets/public_key.pem"
       JWT_PRIVATE_KEY_PATH: "/secrets/private_key.pem"
       CLOUDINARY_CONFIG_JSON: "/secrets/cloudinary_config.json"
+      LOG_FOLDER: "logs"
     volumes:
       - /home/kiriko/dishswap_keys:/secrets
+      - /home/kiriko/dishswap_logs:/logs

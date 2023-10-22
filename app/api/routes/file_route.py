@@ -1,6 +1,7 @@
 from fastapi import HTTPException, APIRouter, Depends
 from services.auth_services import validate_token
 from utils.validator import validate_file_size
+from utils.logger import logger
 from models.response import ErrorOut
 import cloudinary
 import cloudinary.uploader
@@ -10,9 +11,12 @@ import time
 import re
 import requests
 
+
 router = APIRouter()
 
+
 cloudinary_config_path = os.environ.get("CLOUDINARY_CONFIG_JSON")
+
 
 with open(cloudinary_config_path, "r") as config_file:
     cloudinary_config = json.load(config_file)
@@ -22,6 +26,7 @@ cloudinary.config(
     api_key=cloudinary_config["api_key"],
     api_secret=cloudinary_config["api_secret"]
 )
+
 
 @router.post("/upload_params") 
 async def get_upload_url(user_id: str = Depends(validate_token)): 
@@ -36,7 +41,8 @@ async def get_upload_url(user_id: str = Depends(validate_token)):
         return {"timestamp": timestamp, "upload_preset": upload_preset, "signature": signature} 
      
     except Exception as e: 
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(e)
+        raise HTTPException(status_code=400, detail=ErrorOut(message="An unknown error has occurred").model_dump())
     
 
 def is_valid_cloudinary_image(image_url):
@@ -61,8 +67,9 @@ def is_valid_cloudinary_image(image_url):
                 return False
             
     except Exception as e:
-        print(e)
+        logger.error(e)
         return False
+
 
 async def delete_cloudinary_images(image_urls):
     try:
@@ -77,8 +84,9 @@ async def delete_cloudinary_images(image_urls):
                 return False
         return True
     except Exception as e:
-        print(f"Error deleting images: {str(e)}")
-        raise HTTPException(status_code=500, detail=ErrorOut(message=str(e)).model_dump())
+        logger.error(e)
+        raise HTTPException(status_code=400, detail=ErrorOut(message="An unknown error has occurred").model_dump())
+
 
 async def extract_image_path(image_url):
     parts = image_url.split('/')
