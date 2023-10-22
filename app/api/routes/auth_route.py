@@ -8,7 +8,7 @@ from utils.hasher import validate_password
 from services.user_services import get_user_database_out
 from services.auth_services import create_token, validate_token
 
-from exceptions.user_exceptions import UserNotFoundException, LoginPasswordDoesNotMatchException
+from exceptions.user_exceptions import UserNotFoundException, PasswordDoesNotMatchDatabaseException
 
 
 router = APIRouter()
@@ -44,7 +44,7 @@ async def login(user_login: UserLogin  = Body(...)):
     except UserNotFoundException as e:
         # Log e
         raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
-    except LoginPasswordDoesNotMatchException as e:
+    except PasswordDoesNotMatchDatabaseException as e:
         # Log e
         raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
     except Exception as e:

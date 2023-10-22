@@ -1,13 +1,14 @@
-from fastapi import APIRouter, HTTPException, Body
+from fastapi import APIRouter, HTTPException, Body, Depends
 
 from models.response import SuccessOut, ErrorOut
-from models.user import UserRegister, UserDatabaseIn
+from models.user import UserRegister, UserDatabaseIn, UserChangePassword
 
-from utils.hasher import hash_password
+from utils.hasher import hash_password, validate_password
 
-from services.user_services import create_user, check_passwords, check_user_exist
+from services.user_services import create_user, check_passwords, check_user_exist, update_password_by_id, check_passwords_not_same, check_user_exist_with_id 
+from services.auth_services import validate_token
 
-from exceptions.user_exceptions import UserAlreadyExistsException, PasswordsDoNotMatchException, UserNotFoundException, LoginPasswordDoesNotMatchException
+from exceptions.user_exceptions import UserAlreadyExistsException, PasswordsDoNotMatchException, PasswordsMatchException, UserIdNotFoundException, PasswordDoesNotMatchDatabaseException
 
 
 router = APIRouter()
@@ -31,12 +32,44 @@ async def register(user_register: UserRegister  = Body(...)):
 
         await create_user(user_database_in)
 
-        return SuccessOut()
+        return SuccessOut(message="User registered successfully")
     
     except UserAlreadyExistsException as e:
         # Log e
         raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
     except PasswordsDoNotMatchException as e:
+        # Log e
+        raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
+
+
+@router.post("/update_password")
+async def update_password(user_change_password: UserChangePassword  = Body(...), user_id: str = Depends(validate_token)):
+    try:
+        challenge_password = user_change_password.current_password
+        new_password = user_change_password.new_password
+
+        check_passwords_not_same(challenge_password, new_password)
+
+        user_info = await check_user_exist_with_id(user_id)
+            
+        validate_password(challenge_password, user_info.hashed_password)
+        
+        new_hashed_password  = hash_password(new_password)
+
+        await update_password_by_id(user_id, new_hashed_password)
+
+        return SuccessOut(message="Password updated successfully")
+    
+    except PasswordsMatchException as e:
+        # Log e
+        raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
+    except PasswordDoesNotMatchDatabaseException as e:
+        # Log e
+        raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
+    except UserIdNotFoundException as e:
         # Log e
         raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
     except Exception as e:
