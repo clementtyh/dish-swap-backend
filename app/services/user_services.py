@@ -4,7 +4,7 @@ from models.user import UserDatabaseIn
 
 from core.database import MongoDBConnector
 
-from exceptions.user_exceptions import UserAlreadyExistsException, PasswordsDoNotMatchException, UserNotFoundException, PasswordsMatchException, UserIdNotFoundException
+from exceptions.user_exceptions import UserAlreadyExistsException, DisplayNameExistException, PasswordsDoNotMatchException, UserNotFoundException, PasswordsMatchException, UserIdNotFoundException
 from models.user import User, UserDatabaseOut, UserInfo
 
 
@@ -137,6 +137,18 @@ async def update_password_by_id(id, new_hashed_password):
         else:
             raise UserIdNotFoundException(id)
             
+    except Exception as e:
+        raise
+
+
+async def is_display_name_exists(display_name):
+    try:
+        # Check if the display_name exists in the database
+        result = await user_db_collection.count_documents({"display_name": display_name})
+
+        if result > 0:
+            raise DisplayNameExistException(display_name)            
+        
     except Exception as e:
         raise
 
