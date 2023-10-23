@@ -16,16 +16,22 @@ class PasswordsMatchException(Exception):
         super().__init__(self.message)
 
 
-class PasswordDoesNotMatchDatabaseException(Exception):
+class InvalidPasswordException(Exception):
     def __init__(self, message="Invalid password"):
         self.message = message
         super().__init__(self.message)
         
 
+class DisplayNameExistException(Exception):
+    def __init__(self, display_name):
+        self.display_name = display_name
+        super().__init__(f"Display name {self.display_name} already exists")
+
+
 class UserNotFoundException(Exception):
     def __init__(self, email):
         self.email = email
-        super().__init__(f"User with email '{email}' not found")
+        super().__init__(f"User with email '{self.email}' not found")
 
 
 class UserIdNotFoundException(Exception):

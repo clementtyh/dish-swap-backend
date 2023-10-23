@@ -1,5 +1,5 @@
 import bcrypt
-from exceptions.user_exceptions import PasswordDoesNotMatchDatabaseException
+from exceptions.user_exceptions import InvalidPasswordException
 
 def hash_password(password: str):
     try:
@@ -20,7 +20,7 @@ def validate_password(challenge_password: str, hashed_password: str):
         challenge_password = challenge_password.encode("utf-8")
         hashed_password = hashed_password.encode("utf-8")
         if not bcrypt.checkpw(challenge_password, hashed_password):
-            raise PasswordDoesNotMatchDatabaseException
+            raise InvalidPasswordException
 
     except Exception as e:
         print(e)

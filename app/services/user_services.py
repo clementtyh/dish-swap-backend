@@ -4,7 +4,7 @@ from models.user import UserDatabaseIn
 
 from core.database import MongoDBConnector
 
-from exceptions.user_exceptions import UserAlreadyExistsException, PasswordsDoNotMatchException, UserNotFoundException, PasswordsMatchException, UserIdNotFoundException
+from exceptions.user_exceptions import UserAlreadyExistsException, DisplayNameExistException, PasswordsDoNotMatchException, UserNotFoundException, PasswordsMatchException, UserIdNotFoundException
 from models.user import User, UserDatabaseOut, UserInfo
 
 
@@ -129,6 +129,40 @@ async def update_password_by_id(id, new_hashed_password):
         result = await user_db_collection.update_one(
             {"_id": id},
             {"$set": {"hashed_password": new_hashed_password}}
+        )
+        
+        # Check if the update was successful
+        if result.modified_count > 0:
+            return True
+        else:
+            raise UserIdNotFoundException(id)
+            
+    except Exception as e:
+        raise
+
+
+async def is_display_name_exists(display_name):
+    try:
+        # Check if the display_name exists in the database
+        result = await user_db_collection.count_documents({"display_name": display_name})
+
+        if result > 0:
+            raise DisplayNameExistException(display_name)            
+        
+    except Exception as e:
+        raise
+
+
+async def update_display_name_by_id(id, new_display_name):
+    try:
+        # Ensure the id is of type ObjectId
+        if not isinstance(id, ObjectId):
+            id = ObjectId(id)
+
+        # Update the display_name based on the _id
+        result = await user_db_collection.update_one(
+            {"_id": id},
+            {"$set": {"display_name": new_display_name}}
         )
         
         # Check if the update was successful

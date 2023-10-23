@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Body, Request
 
-from models.auth import UserLogin
+from models.auth import Login
 from models.response import SuccessOut, ErrorOut
 
 from utils.hasher import validate_password
@@ -9,7 +9,7 @@ from utils.logger import logger
 from services.user_services import get_user_database_out
 from services.auth_services import create_token, validate_token
 
-from exceptions.user_exceptions import UserNotFoundException, PasswordDoesNotMatchDatabaseException
+from exceptions.user_exceptions import UserNotFoundException, InvalidPasswordException
 
 
 router = APIRouter()
@@ -21,10 +21,9 @@ async def root():
 
 
 @router.post("/login")
-async def login(request: Request, user_login: UserLogin  = Body(...)):
-    client_ip = request.client.host
-    challenge_email = user_login.email
-    challenge_password = user_login.password
+async def login(login: Login  = Body(...)):
+    challenge_email = login.email
+    challenge_password = login.password
 
     try:
         user_info = await get_user_database_out(challenge_email)
@@ -44,21 +43,20 @@ async def login(request: Request, user_login: UserLogin  = Body(...)):
         return response
 
     except UserNotFoundException as e:
-        logger.debug(f'IP: {client_ip} Message: {e}')
+        logger.info(e)
         raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
-    except PasswordDoesNotMatchDatabaseException as e:
-        logger.debug(f'IP: {client_ip} Message: {e}')
+    except InvalidPasswordException as e:
+        logger.info(e)
         raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
     except Exception as e:
-        logger.error(f'IP: {client_ip} Message: {e}')
+        logger.error(e)
         raise HTTPException(status_code=400, detail=ErrorOut(message="An unknown error has occurred").model_dump())
 
 
 @router.post("/verify")
-async def verify(request: Request, user_id: str = Depends(validate_token)):
+async def verify(user_id: str = Depends(validate_token)):
     try:
-        client_ip = request.client.host
         return SuccessOut(message="Token is valid")
     except Exception as e:
-        logger.error(f'IP: {client_ip} Message: {e}')
+        logger.error(e)
         raise HTTPException(status_code=400, detail=ErrorOut(message="An unknown error has occurred").model_dump())

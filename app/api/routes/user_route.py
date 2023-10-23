@@ -2,7 +2,7 @@
 from fastapi import APIRouter, HTTPException, Body, Request, Depends
 
 from models.response import SuccessOut, ErrorOut
-from models.user import UserRegister, UserDatabaseIn, UserChangePassword
+from models.user import UserRegister, UserDatabaseIn, UserUpdatePassword, UserUpdateDisplayName
 
 
 from utils.hasher import hash_password
@@ -11,10 +11,10 @@ from utils.logger import logger
 from utils.hasher import hash_password, validate_password
 
 
-from services.user_services import get_user, create_user, check_passwords, check_user_exist, update_password_by_id, check_passwords_not_same, get_user_database_out_with_id 
+from services.user_services import get_user, create_user, is_display_name_exists, check_passwords, check_user_exist, update_password_by_id, update_display_name_by_id, check_passwords_not_same, get_user_database_out_with_id 
 from services.auth_services import validate_token
 
-from exceptions.user_exceptions import UserAlreadyExistsException, PasswordsDoNotMatchException, PasswordsMatchException, UserIdNotFoundException, PasswordDoesNotMatchDatabaseException
+from exceptions.user_exceptions import DisplayNameExistException, UserAlreadyExistsException, PasswordsDoNotMatchException, PasswordsMatchException, UserIdNotFoundException, InvalidPasswordException
 
 
 router = APIRouter()
@@ -52,38 +52,6 @@ async def register(user_register: UserRegister  = Body(...)):
         raise HTTPException(status_code=400, detail=ErrorOut(message="An unknown error has occurred").model_dump())
 
 
-@router.post("/update_password")
-async def update_password(request: Request, user_change_password: UserChangePassword  = Body(...), user_id: str = Depends(validate_token)):
-    try:
-        challenge_password = user_change_password.current_password
-        new_password = user_change_password.new_password
-
-        check_passwords_not_same(challenge_password, new_password)
-
-        user_info = await get_user_database_out_with_id(user_id)
-            
-        validate_password(challenge_password, user_info.hashed_password)
-        
-        new_hashed_password = hash_password(new_password)
-
-        await update_password_by_id(user_id, new_hashed_password)
-
-        return SuccessOut(message="Password updated successfully")
-    
-    except PasswordsMatchException as e:
-        logger.info(e)
-        raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
-    except PasswordDoesNotMatchDatabaseException as e:
-        logger.info(e)
-        raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
-    except UserIdNotFoundException as e:
-        logger.info(e)
-        raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
-    except Exception as e:
-        logger.error(e)
-        raise HTTPException(status_code=400, detail=ErrorOut(message="An unknown error has occurred").model_dump())
-
-
 @router.get("/get_user")
 async def update_password(user_id: str = Depends(validate_token)):
     try:
@@ -102,3 +70,66 @@ async def update_password(user_id: str = Depends(validate_token)):
     except Exception as e:
         logger.error(e)
         raise HTTPException(status_code=400, detail=ErrorOut(message="An unknown error has occurred").model_dump())
+    
+
+@router.post("/update_password")
+async def update_password(user_update_password: UserUpdatePassword  = Body(...), user_id: str = Depends(validate_token)):
+    try:
+        challenge_password = user_update_password.current_password
+        new_password = user_update_password.new_password
+
+        check_passwords_not_same(challenge_password, new_password)
+
+        user_info = await get_user_database_out_with_id(user_id)
+            
+        validate_password(challenge_password, user_info.hashed_password)
+        
+        new_hashed_password = hash_password(new_password)
+
+        await update_password_by_id(user_id, new_hashed_password)
+
+        return SuccessOut(message="Password updated successfully")
+    
+    except PasswordsMatchException as e:
+        logger.info(e)
+        raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
+    except InvalidPasswordException as e:
+        logger.info(e)
+        raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
+    except UserIdNotFoundException as e:
+        logger.info(e)
+        raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
+    except Exception as e:
+        logger.error(e)
+        raise HTTPException(status_code=400, detail=ErrorOut(message="An unknown error has occurred").model_dump())
+
+
+@router.post("/update_display_name")
+async def update_display_name(user_update_display_name: UserUpdateDisplayName  = Body(...), user_id: str = Depends(validate_token)):
+    try:
+        display_name = user_update_display_name.new_display_name
+        challenge_password = user_update_display_name.password
+
+        await is_display_name_exists(display_name)
+
+        user_info = await get_user_database_out_with_id(user_id)
+
+        validate_password(challenge_password, user_info.hashed_password)
+
+        await update_display_name_by_id(user_id, user_update_display_name.new_display_name)
+
+        return SuccessOut(message="Display name updated successfully")
+
+    except DisplayNameExistException as e:
+        logger.info(e)
+        raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
+    except InvalidPasswordException as e:
+        logger.info(e)
+        raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
+    except UserIdNotFoundException as e:
+        logger.info(e)
+        raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
+    except Exception as e:
+        logger.error(e)
+        raise HTTPException(status_code=400, detail=ErrorOut(message="An unknown error has occurred").model_dump())
+
