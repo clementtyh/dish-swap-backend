@@ -139,3 +139,25 @@ async def update_password_by_id(id, new_hashed_password):
             
     except Exception as e:
         raise
+
+
+async def update_display_name_by_id(id, new_display_name):
+    try:
+        # Ensure the id is of type ObjectId
+        if not isinstance(id, ObjectId):
+            id = ObjectId(id)
+
+        # Update the display_name based on the _id
+        result = await user_db_collection.update_one(
+            {"_id": id},
+            {"$set": {"display_name": new_display_name}}
+        )
+        
+        # Check if the update was successful
+        if result.modified_count > 0:
+            return True
+        else:
+            raise UserIdNotFoundException(id)
+            
+    except Exception as e:
+        raise

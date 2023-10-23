@@ -52,8 +52,28 @@ async def register(user_register: UserRegister  = Body(...)):
         raise HTTPException(status_code=400, detail=ErrorOut(message="An unknown error has occurred").model_dump())
 
 
+@router.get("/get_user")
+async def update_password(user_id: str = Depends(validate_token)):
+    try:
+        user = await get_user(user_id)
+
+        payload = {
+            "email": user.email, 
+            "display_name": user.display_name, 
+        }
+
+        return SuccessOut(payload=payload)
+    
+    except UserIdNotFoundException as e:
+        logger.info(e)
+        raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
+    except Exception as e:
+        logger.error(e)
+        raise HTTPException(status_code=400, detail=ErrorOut(message="An unknown error has occurred").model_dump())
+    
+
 @router.post("/update_password")
-async def update_password(request: Request, user_update_password: UserUpdatePassword  = Body(...), user_id: str = Depends(validate_token)):
+async def update_password(user_update_password: UserUpdatePassword  = Body(...), user_id: str = Depends(validate_token)):
     try:
         challenge_password = user_update_password.current_password
         new_password = user_update_password.new_password
@@ -84,21 +104,6 @@ async def update_password(request: Request, user_update_password: UserUpdatePass
         raise HTTPException(status_code=400, detail=ErrorOut(message="An unknown error has occurred").model_dump())
 
 
-@router.get("/get_user")
-async def update_password(user_id: str = Depends(validate_token)):
-    try:
-        user = await get_user(user_id)
-
-        payload = {
-            "email": user.email, 
-            "display_name": user.display_name, 
-        }
-
-        return SuccessOut(payload=payload)
-    
-    except UserIdNotFoundException as e:
-        logger.info(e)
-        raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
-    except Exception as e:
-        logger.error(e)
-        raise HTTPException(status_code=400, detail=ErrorOut(message="An unknown error has occurred").model_dump())
+@router.post("/update_display_name")
+async def update_display_name(user_update_password: UserUpdatePassword  = Body(...), user_id: str = Depends(validate_token)):
+    pass

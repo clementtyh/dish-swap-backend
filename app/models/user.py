@@ -68,13 +68,13 @@ class UserUpdatePassword(BaseModel):
 
 
 class UserUpdateDisplayName(BaseModel):
-    email: str
+    new_display_name: str
     password: str
 
-    @validator("email")
-    def validate_model_email(cls, value):
-        if not validate_email(value):
-            raise HTTPException(status_code=400, detail="Invalid email")
+    @validator("new_display_name")
+    def validate_model_display_name(cls, value):
+        if not validate_display_name(value):
+            raise HTTPException(status_code=400, detail="Invalid display name")
         return value
     
     @validator("password")

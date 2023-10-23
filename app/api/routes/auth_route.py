@@ -21,8 +21,7 @@ async def root():
 
 
 @router.post("/login")
-async def login(request: Request, user_login: UserLogin  = Body(...)):
-    client_ip = request.client.host
+async def login(user_login: UserLogin  = Body(...)):
     challenge_email = user_login.email
     challenge_password = user_login.password
 
@@ -44,21 +43,20 @@ async def login(request: Request, user_login: UserLogin  = Body(...)):
         return response
 
     except UserNotFoundException as e:
-        logger.debug(f'IP: {client_ip} Message: {e}')
+        logger.info(e)
         raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
     except PasswordDoesNotMatchDatabaseException as e:
-        logger.debug(f'IP: {client_ip} Message: {e}')
+        logger.info(e)
         raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
     except Exception as e:
-        logger.error(f'IP: {client_ip} Message: {e}')
+        logger.error(e)
         raise HTTPException(status_code=400, detail=ErrorOut(message="An unknown error has occurred").model_dump())
 
 
 @router.post("/verify")
-async def verify(request: Request, user_id: str = Depends(validate_token)):
+async def verify(user_id: str = Depends(validate_token)):
     try:
-        client_ip = request.client.host
         return SuccessOut(message="Token is valid")
     except Exception as e:
-        logger.error(f'IP: {client_ip} Message: {e}')
+        logger.error(e)
         raise HTTPException(status_code=400, detail=ErrorOut(message="An unknown error has occurred").model_dump())
