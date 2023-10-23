@@ -1,6 +1,6 @@
 from pydantic import BaseModel, validator, Field
 from fastapi import HTTPException
-from utils.validator import validate_email, validate_display_name, validate_password
+from utils.validator import validate_email, validate_display_name, validate_password, validate_alphanumeric_symbols
 from models.response import ErrorOut
 
 
@@ -38,32 +38,19 @@ class UserRegister(User):
         return value
 
 
-class UserDatabaseIn(User):
-    hashed_password: str
+class UserInfo(User):
     user_type: str
+
+
+class UserDatabaseIn(UserInfo):
+    hashed_password: str
 
 
 class UserDatabaseOut(UserDatabaseIn):
     id: str = Field(alias="_id")
 
 
-class UserInfo(User):
-    user_type: str
-
-    @validator("email")
-    def validate_model_email(cls, value):
-        if not validate_email(value):
-            raise HTTPException(status_code=400, detail="Invalid email")
-        return value
-
-    @validator("display_name")
-    def validate_model_display_name(cls, value):
-        if not validate_display_name(value):
-            raise HTTPException(status_code=400, detail="Invalid display name")
-        return value
-    
-
-class UserChangePassword(BaseModel):
+class UserUpdatePassword(BaseModel):
     current_password: str
     new_password: str
 
@@ -78,4 +65,21 @@ class UserChangePassword(BaseModel):
         if not validate_password(value):
             raise HTTPException(status_code=400, detail=ErrorOut(message="New password does not meet the complexity requirements").model_dump())
         return value
+
+
+class UserUpdateDisplayName(BaseModel):
+    email: str
+    password: str
+
+    @validator("email")
+    def validate_model_email(cls, value):
+        if not validate_email(value):
+            raise HTTPException(status_code=400, detail="Invalid email")
+        return value
     
+    @validator("password")
+    def validate_model_password(cls, value):
+        # Do not use validate_password
+        if not validate_alphanumeric_symbols(value):
+            raise HTTPException(status_code=400, detail=ErrorOut(message="Invalid password").model_dump())
+        return value

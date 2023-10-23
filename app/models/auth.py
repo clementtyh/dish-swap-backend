@@ -26,7 +26,7 @@ class UserLogin(BaseModel):
 
     @validator("password")
     def validate_model_password(cls, value):
-        # Do not user validate_password here because its login page password field
+        # Do not use validate_password
         if not validate_alphanumeric_symbols(value):
             raise HTTPException(status_code=400, detail=ErrorOut(message="Invalid password").model_dump())
         return value

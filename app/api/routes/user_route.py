@@ -2,7 +2,7 @@
 from fastapi import APIRouter, HTTPException, Body, Request, Depends
 
 from models.response import SuccessOut, ErrorOut
-from models.user import UserRegister, UserDatabaseIn, UserChangePassword
+from models.user import UserRegister, UserDatabaseIn, UserUpdatePassword
 
 
 from utils.hasher import hash_password
@@ -53,10 +53,10 @@ async def register(user_register: UserRegister  = Body(...)):
 
 
 @router.post("/update_password")
-async def update_password(request: Request, user_change_password: UserChangePassword  = Body(...), user_id: str = Depends(validate_token)):
+async def update_password(request: Request, user_update_password: UserUpdatePassword  = Body(...), user_id: str = Depends(validate_token)):
     try:
-        challenge_password = user_change_password.current_password
-        new_password = user_change_password.new_password
+        challenge_password = user_update_password.current_password
+        new_password = user_update_password.new_password
 
         check_passwords_not_same(challenge_password, new_password)
 
