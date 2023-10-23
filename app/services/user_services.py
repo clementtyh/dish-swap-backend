@@ -5,7 +5,7 @@ from models.user import UserDatabaseIn
 from core.database import MongoDBConnector
 
 from exceptions.user_exceptions import UserAlreadyExistsException, PasswordsDoNotMatchException, UserNotFoundException, PasswordsMatchException, UserIdNotFoundException
-from models.user import UserDatabaseOut, UserProfile
+from models.user import UserDatabaseOut, UserInfo
 
 
 # Get singleton db connection
@@ -18,6 +18,18 @@ def check_passwords(password: str, confirm_password: str):
 
 def check_passwords_not_same(current_password: str, new_password: str):
     if current_password == new_password: raise PasswordsMatchException
+
+
+async def create_user(user_database_in: UserDatabaseIn) -> bool:
+    try:
+        result = await user_db_collection.insert_one(user_database_in.model_dump())
+
+        if result:
+            return True
+
+        return False
+    except Exception as e:
+        raise
 
 
 async def check_user_exist(email: str, display_name: str):
@@ -38,7 +50,7 @@ async def check_user_exist(email: str, display_name: str):
         raise
 
 
-async def check_user_exist_with_id(id: str):
+async def get_user_database_out_with_id(id: str):
     try:
         user = await user_db_collection.find_one({"_id": ObjectId(id)})
         if user:
@@ -48,19 +60,6 @@ async def check_user_exist_with_id(id: str):
 
         raise UserIdNotFoundException(id)
     
-    except Exception as e:
-        raise
-
-
-
-async def create_user(user_database_in: UserDatabaseIn) -> bool:
-    try:
-        result = await user_db_collection.insert_one(user_database_in.model_dump())
-
-        if result:
-            return True
-
-        return False
     except Exception as e:
         raise
 
@@ -79,12 +78,12 @@ async def get_user_database_out(email: str):
         raise
 
 
-async def get_user_profile(email: str):
+async def get_user_info(email: str):
     try:
         user = await user_db_collection.find_one({"email": email})
 
         if user:
-            return UserProfile(**user)
+            return UserInfo(**user)
 
         raise UserNotFoundException(email)
     
@@ -92,13 +91,13 @@ async def get_user_profile(email: str):
         raise
 
 
-async def get_user_profile_with_id(id: str):
+async def get_user_info_with_id(id: str):
     try:
         user = await user_db_collection.find_one({"_id": ObjectId(id)})
         if user:
             user["_id"] = str(user["_id"])
 
-            return UserProfile(**user)
+            return UserInfo(**user)
 
         raise UserIdNotFoundException(id)
     

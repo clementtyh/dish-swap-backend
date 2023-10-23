@@ -4,24 +4,27 @@ from utils.validator import validate_email, validate_display_name, validate_pass
 from models.response import ErrorOut
 
 
-class UserRegister(BaseModel):
+class User(BaseModel):
     email: str
     display_name: str
-    password: str
-    confirm_password: str
 
     @validator("email")
     def validate_model_email(cls, value):
         if not validate_email(value):
-            raise HTTPException(status_code=400, detail=ErrorOut(message="Invalid email").model_dump())
+            raise HTTPException(status_code=400, detail="Invalid email")
         return value
 
     @validator("display_name")
     def validate_model_display_name(cls, value):
         if not validate_display_name(value):
-            raise HTTPException(status_code=400, detail=ErrorOut(message="Invalid display name").model_dump())
+            raise HTTPException(status_code=400, detail="Invalid display name")
         return value
     
+
+class UserRegister(User):
+    password: str
+    confirm_password: str
+
     @validator("password")
     def validate_model_password(cls, value):
         if not validate_password(value):
@@ -31,40 +34,20 @@ class UserRegister(BaseModel):
     @validator("confirm_password")
     def validate_model_confirm_password(cls, value):
         if not validate_password(value):
-            raise HTTPException(status_code=400, detail=ErrorOut(message="Password does not meet the complexity requirements").model_dump())
+            raise HTTPException(status_code=400, detail=ErrorOut(message="Password and confirmation password must be the same").model_dump())
         return value
-    
 
-class UserDatabaseIn(BaseModel):
-    email: str
-    display_name: str
+
+class UserDatabaseIn(User):
     hashed_password: str
     user_type: str
 
-    @validator("email")
-    def validate_model_email(cls, value):
-        if not validate_email(value):
-            raise HTTPException(status_code=400, detail=ErrorOut(message="Invalid email").model_dump())
-        return value
 
-    @validator("display_name")
-    def validate_model_display_name(cls, value):
-        if not validate_display_name(value):
-            raise HTTPException(status_code=400, detail=ErrorOut(message="Invalid display name").model_dump())
-        return value
-    
-
-class UserDatabaseOut(BaseModel):
+class UserDatabaseOut(UserDatabaseIn):
     id: str = Field(alias="_id")
-    hashed_password: str
-    user_type: str
-    display_name: str
 
 
-    
-class UserProfile(BaseModel):
-    email: str
-    display_name: str
+class UserInfo(User):
     user_type: str
 
     @validator("email")
@@ -78,7 +61,7 @@ class UserProfile(BaseModel):
         if not validate_display_name(value):
             raise HTTPException(status_code=400, detail="Invalid display name")
         return value
-
+    
 
 class UserChangePassword(BaseModel):
     current_password: str

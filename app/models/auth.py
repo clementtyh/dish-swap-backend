@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 from pydantic import BaseModel, validator
-from utils.validator import validate_jwt_token, validate_email, validate_alphanumeric_symbols, validate_password
+from utils.validator import validate_jwt_token, validate_email, validate_alphanumeric_symbols
 from models.response import ErrorOut
 
 
@@ -26,6 +26,7 @@ class UserLogin(BaseModel):
 
     @validator("password")
     def validate_model_password(cls, value):
-        if not validate_password(value):
+        # Do not user validate_password here because its login page password field
+        if not validate_alphanumeric_symbols(value):
             raise HTTPException(status_code=400, detail=ErrorOut(message="Invalid password").model_dump())
         return value

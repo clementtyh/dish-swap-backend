@@ -11,7 +11,7 @@ from utils.logger import logger
 from utils.hasher import hash_password, validate_password
 
 
-from services.user_services import create_user, check_passwords, check_user_exist, update_password_by_id, check_passwords_not_same, check_user_exist_with_id 
+from services.user_services import create_user, check_passwords, check_user_exist, update_password_by_id, check_passwords_not_same, get_user_database_out_with_id 
 from services.auth_services import validate_token
 
 from exceptions.user_exceptions import UserAlreadyExistsException, PasswordsDoNotMatchException, PasswordsMatchException, UserIdNotFoundException, PasswordDoesNotMatchDatabaseException
@@ -63,7 +63,7 @@ async def update_password(user_change_password: UserChangePassword  = Body(...),
 
         check_passwords_not_same(challenge_password, new_password)
 
-        user_info = await check_user_exist_with_id(user_id)
+        user_info = await get_user_database_out_with_id(user_id)
             
         validate_password(challenge_password, user_info.hashed_password)
         

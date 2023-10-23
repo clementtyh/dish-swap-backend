@@ -17,7 +17,7 @@ class PasswordsMatchException(Exception):
 
 
 class PasswordDoesNotMatchDatabaseException(Exception):
-    def __init__(self, message="Provided password does not match"):
+    def __init__(self, message="Invalid password"):
         self.message = message
         super().__init__(self.message)
         
