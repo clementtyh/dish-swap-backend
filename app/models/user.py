@@ -64,7 +64,6 @@ class UserDatabaseOut(BaseModel):
     
 class UserProfile(BaseModel):
     email: str
-    display_name: str
     user_type: str
 
     @validator("email")
@@ -73,8 +72,8 @@ class UserProfile(BaseModel):
             raise HTTPException(status_code=400, detail="Invalid email")
         return value
 
-    @validator("display_name")
-    def validate_display_name(cls, value):
-        if not validate_display_name(value):
-            raise HTTPException(status_code=400, detail="Invalid display name")
-        return value
+    # @validator("display_name")
+    # def validate_display_name(cls, value):
+    #     if not validate_display_name(value):
+    #         raise HTTPException(status_code=400, detail="Invalid display name")
+    #     return value
