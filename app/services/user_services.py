@@ -5,7 +5,7 @@ from models.user import UserDatabaseIn
 from core.database import MongoDBConnector
 
 from exceptions.user_exceptions import UserAlreadyExistsException, PasswordsDoNotMatchException, UserNotFoundException, PasswordsMatchException, UserIdNotFoundException
-from models.user import UserDatabaseOut, UserInfo
+from models.user import User, UserDatabaseOut, UserInfo
 
 
 # Get singleton db connection
@@ -86,6 +86,20 @@ async def get_user_info(email: str):
             return UserInfo(**user)
 
         raise UserNotFoundException(email)
+    
+    except Exception as e:
+        raise
+
+
+async def get_user(id: str):
+    try:
+        user = await user_db_collection.find_one({"_id": ObjectId(id)})
+        if user:
+            user["_id"] = str(user["_id"])
+
+            return User(**user)
+
+        raise UserIdNotFoundException(id)
     
     except Exception as e:
         raise
