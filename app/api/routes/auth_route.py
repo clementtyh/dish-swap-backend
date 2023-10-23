@@ -37,7 +37,6 @@ async def login(request: Request, user_login: UserLogin  = Body(...)):
 
         payload = {
             "token": token, 
-            "displayName": user_info.display_name,
         }
 
         response = SuccessOut(message="Login successful", payload=payload)
