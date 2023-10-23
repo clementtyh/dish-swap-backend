@@ -31,7 +31,7 @@ async def login(user_login: UserLogin  = Body(...)):
 
         minutes_to_expire = 60
 
-        token = create_token({"id": user_info.id, "displayName": user_info.display_name,}, minutes_to_expire)
+        token = create_token({"id": user_info.id, "displayName": user_info.display_name}, minutes_to_expire)
 
         payload = {
             "token": token, 
