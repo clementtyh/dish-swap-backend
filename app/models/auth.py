@@ -14,7 +14,7 @@ class Token(BaseModel):
         return value
 
 
-class UserLogin(BaseModel):
+class Login(BaseModel):
     email: str
     password: str
 

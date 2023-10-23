@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Body, Request
 
-from models.auth import UserLogin
+from models.auth import Login
 from models.response import SuccessOut, ErrorOut
 
 from utils.hasher import validate_password
@@ -21,9 +21,9 @@ async def root():
 
 
 @router.post("/login")
-async def login(user_login: UserLogin  = Body(...)):
-    challenge_email = user_login.email
-    challenge_password = user_login.password
+async def login(login: Login  = Body(...)):
+    challenge_email = login.email
+    challenge_password = login.password
 
     try:
         user_info = await get_user_database_out(challenge_email)
