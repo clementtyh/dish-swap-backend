@@ -108,13 +108,8 @@ async def update_password(user_update_password: UserUpdatePassword  = Body(...),
 async def update_display_name(user_update_display_name: UserUpdateDisplayName  = Body(...), user_id: str = Depends(validate_token)):
     try:
         display_name = user_update_display_name.new_display_name
-        challenge_password = user_update_display_name.password
 
         await is_display_name_exists(display_name)
-
-        user_info = await get_user_database_out_with_id(user_id)
-
-        validate_password(challenge_password, user_info.hashed_password)
 
         await update_display_name_by_id(user_id, user_update_display_name.new_display_name)
 
