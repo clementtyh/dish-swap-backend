@@ -12,7 +12,7 @@ services:
       - "8091:8090"
     environment:
       HOST: "0.0.0.0"
-      PORT: 8091
+      PORT: 8090
       DB_URI: "mongodb+srv://dishswap-dev.cswgyuz.mongodb.net/?authSource=%24external&authMechanism=MONGODB-X509&retryWrites=true&w=majority"
       CERT_FILE_PATH: "/secrets/X509-cert-7976952216393498770-dev.pem"
       JWT_PUBLIC_KEY_PATH: "/secrets/public_key_dev.pem"
