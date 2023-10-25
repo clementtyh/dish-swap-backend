@@ -9,15 +9,13 @@ pipeline {
                 script {
                     // Set up the virtual environment
                     sh 'python3 -m venv venv'
-
+                    // Give jenkins permission to run script
                     sh 'sudo chmod +x ./venv/bin/activate'
-
                     // Activate the virtual environment
                     sh './venv/bin/activate'
-
                     // Upgrade pip within the virtual environment
                     sh './venv/bin/pip install --upgrade pip'
-
+                    // Install environment
                     sh './venv/bin/pip install -r requirements.txt'
                 }
             }
@@ -25,19 +23,57 @@ pipeline {
 
         stage('Unit Test') {
             environment {
-                    JWT_PUBLIC_KEY_PATH = "/var/lib/jenkins/keys/public_key.pem"
-                    JWT_PRIVATE_KEY_PATH = "/var/lib/jenkins/keys/private_key.pem"
+                JWT_PUBLIC_KEY_PATH = "/var/lib/jenkins/keys/public_key.pem"
+                JWT_PRIVATE_KEY_PATH = "/var/lib/jenkins/keys/private_key.pem"
             }
             steps {
                 echo 'Testing...'
                 // Add test steps here
-
                 script {
                     // Activate the virtual environment
-                    sh 'printenv'
                     sh './venv/bin/activate'
+                    // Run pytest to test scripts from app/test folder
+                    sh './venv/bin/pytest app/test'
+                }
+            }
+        }
 
-                    sh './venv/bin/pytest'
+        stage('Run Test Container') {
+            steps {
+                echo 'Running test container...'
+                // Add test steps here
+                script {
+                    // Up container
+                    sh 'docker-compose -f docker-compose-dev.yaml up -d'
+                }
+            }
+        }
+
+        stage('Integration Test') {
+            environment {
+                TEST_URL = "http://localhost:8091"
+            }
+            steps {
+                echo 'Testing...'
+                // Add test steps here
+                script {
+                    // Activate the virtual environment
+                    sh './venv/bin/activate'
+                    // Run status check on test container
+                    sh './venv/bin/pytest integration_test/test_root.py'
+                    // Run full integration test
+                    sh './venv/bin/pytest integration_test/main_test'
+                }
+            }
+        }
+
+        stage('Tear Down Test Container') {
+            steps {
+                echo 'Tearing down...'
+                // Add test steps here
+                script {
+                    // Down container
+                    sh 'docker-compose -f docker-compose-dev.yaml down'
                 }
             }
         }
