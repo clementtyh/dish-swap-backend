@@ -5,11 +5,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: dishswap-backend-container  # Set custom container name
+    container_name: dishswap-backend-container          # Set custom container name
     image: clementtyh/dishswap-backend:latest           # Set custom image name and version
     restart: always
     ports:
-      - "8090:8090"
+      - "8090:8080"
     environment:
       HOST: "0.0.0.0"
       PORT: 8090

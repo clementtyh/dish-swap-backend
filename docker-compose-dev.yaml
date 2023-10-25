@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+  dishswap-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dev-dishswap-backend-container   # Set custom container name
+    image: clementtyh/dishswap-backend:dev           # Set custom image name and version
+    restart: always
+    ports:
+      - "8091:8080"
+    environment:
+      HOST: "0.0.0.0"
+      PORT: 8091
+      DB_URI: "mongodb+srv://dishswap-dev.cswgyuz.mongodb.net/?authSource=%24external&authMechanism=MONGODB-X509&retryWrites=true&w=majority"
+      CERT_FILE_PATH: "/secrets/X509-cert-7976952216393498770-dev.pem"
+      JWT_PUBLIC_KEY_PATH: "/secrets/public_key_dev.pem"
+      JWT_PRIVATE_KEY_PATH: "/secrets/private_key_dev.pem"
+      CLOUDINARY_CONFIG_JSON: "/secrets/cloudinary_config.json"
+      LOG_FOLDER: "logs"
+    volumes:
+      - /home/kiriko/dishswap_keys:/secrets
+      - /home/kiriko/dishswap_dev_logs:/logs
