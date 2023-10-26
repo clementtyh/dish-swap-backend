@@ -1,6 +1,7 @@
 from core.database import MongoDBConnector
 from bson.objectid import ObjectId
 from exceptions.recipe_exceptions import InvalidRecipeIDException
+from exceptions.review_exceptions import InvalidReviewIDException, ReviewNotFoundException
 from models.review import ReviewDatabaseIn
  
 # Get singleton db connection
@@ -64,6 +65,21 @@ async def get_reviews_count(recipe_id):
     except Exception as e:
         raise e
 
+async def get_review(review_id):
+    try:
+        if not ObjectId.is_valid(review_id):
+            raise InvalidReviewIDException(review_id)
+
+        review = await review_db_collection.find_one({"_id": ObjectId(review_id)})
+
+        if review is None:
+            raise ReviewNotFoundException(review_id)
+        
+        return review
+        
+    except Exception as e:
+        raise
+
 async def insert_review(review_database_in: ReviewDatabaseIn) -> str:
     try:
         result = await review_db_collection.insert_one(review_database_in)
@@ -75,6 +91,20 @@ async def insert_review(review_database_in: ReviewDatabaseIn) -> str:
     except Exception as e:
         raise e
 
+async def delete_one_review(review_id: str) -> bool:
+    try:
+        if not ObjectId.is_valid(review_id):
+            raise InvalidReviewIDException(review_id)
+        
+        result = await review_db_collection.delete_one({"_id": ObjectId(review_id)})
+        
+        if result.deleted_count == 1:
+            return True
+        else:
+            return False
+
+    except Exception as e:
+        raise e 
 
 async def delete_recipe_reviews(recipe_id: str) -> bool:
     try:
@@ -87,3 +117,4 @@ async def delete_recipe_reviews(recipe_id: str) -> bool:
 
     except Exception as e:
         raise e 
+

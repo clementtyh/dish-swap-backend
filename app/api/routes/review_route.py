@@ -7,7 +7,7 @@ from models.review import *
 from utils.logger import logger
 from services.recipe_services import get_recipe
 from exceptions.recipe_exceptions import RecipeNotFoundException
-
+from exceptions.review_exceptions import *
 
 router = APIRouter()
 
@@ -53,3 +53,32 @@ async def create_review(review_data: Review = Body(...), user_id: str = Depends(
     except Exception as e:
         logger.error(e)
         raise HTTPException(status_code=500, detail=ErrorOut(message=str(e)).model_dump())
+    
+@router.post("/delete/{review_id}", response_model=SuccessOut)
+async def delete_review(review_id: str, user_id: str = Depends(validate_token)
+):
+    try:
+        existing_review = await get_review(review_id)
+
+        if user_id != str(existing_review['created_by']):
+            raise UnauthorisedReviewModificationException(review_id)
+
+        delete_review_success = await delete_one_review(review_id)
+
+        if delete_review_success:
+            return SuccessOut(message="Review deleted successfully")
+        else:
+            return ErrorOut(message="Failed to delete the review")
+        
+    except InvalidReviewIDException as e:
+        logger.info(e)
+        raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
+    except ReviewNotFoundException as e:
+        logger.info(e)
+        raise HTTPException(status_code=404, detail=ErrorOut(message=str(e)).model_dump())
+    except UnauthorisedReviewModificationException as e:
+        logger.info(e)
+        raise HTTPException(status_code=403, detail=ErrorOut(message=str(e)).model_dump())
+    except Exception as e:
+        logger.error(e)
+        raise HTTPException(status_code=400, detail=ErrorOut(message="An unknown error has occurred").model_dump())
