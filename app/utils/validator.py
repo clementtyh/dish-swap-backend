@@ -158,3 +158,18 @@ def validate_max_images(field_name, value):
             status_code=400,
             detail=ErrorOut(message=f"Exceeded maximum {field_name} count of {max_image_count}").model_dump()
         )
+    
+
+def validate_review_text(value: str):
+    min_length = 10
+    max_length = 500
+    if not validate_length_range(value, min_length, max_length):
+        return False
+    return True
+
+
+def validate_rating(value: str):
+    servings_pattern = "^(?:[1-5])$"
+    if not re.match(servings_pattern, value):
+        return False
+    return True
