@@ -6,7 +6,7 @@ class InvalidRecipeIDException(Exception):
 class RecipeNotFoundException(Exception):
     def __init__(self, id):
         self.id = id
-        super().__init__(f"User with id '{id}' not found")
+        super().__init__(f"User with recipe id '{id}' not found")
 
 class UnauthorisedRecipeModificationException(Exception):
     def __init__(self, recipe_name):

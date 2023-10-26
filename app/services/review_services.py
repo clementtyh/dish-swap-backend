@@ -1,7 +1,8 @@
 from core.database import MongoDBConnector
 from bson.objectid import ObjectId
 from exceptions.recipe_exceptions import InvalidRecipeIDException
-
+from models.review import ReviewDatabaseIn
+ 
 # Get singleton db connection
 review_db_collection = MongoDBConnector.get_client()["dishswapdb"]["reviews"]
 
@@ -62,6 +63,18 @@ async def get_reviews_count(recipe_id):
         return count
     except Exception as e:
         raise e
+
+async def insert_review(review_database_in: ReviewDatabaseIn) -> str:
+    try:
+        result = await review_db_collection.insert_one(review_database_in)
+
+        if result:
+            return str(result.inserted_id)
+
+        return None
+    except Exception as e:
+        raise e
+
 
 async def delete_recipe_reviews(recipe_id: str) -> bool:
     try:

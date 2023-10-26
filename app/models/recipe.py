@@ -22,9 +22,9 @@ class Recipe(BaseModel):
     recipe_description: str
     ingredients: List[str]
     steps: List[str]
-    total_time: Union [int, str]
+    total_time: int
     difficulty: str
-    servings: Union [int, str]
+    servings: int
     image_files: List[str]
 
     @validator("recipe_name")

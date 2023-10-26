@@ -1,10 +1,37 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, validator, Field
+from typing import Union
+from utils.validator import *
 from utils.annotations import PydanticObjectId
-import datetime
+from datetime import datetime
+from enum import Enum
+
 
 class Test(BaseModel):
     id: PydanticObjectId = Field(alias="_id")
     display_name: str
+
+class FieldName(Enum):
+    REVIEW_TEXT = "Review text"
+    REVIEW_RATING = "Rating"
+
+class Review(BaseModel):
+    text: str
+    rating: int
+    recipe_id: str
+
+    @validator("text")
+    def validate_text(cls, value):
+        validate_required(FieldName.REVIEW_TEXT.value, value)
+        validate_invalid(FieldName.REVIEW_TEXT.value, value, validate_func=validate_review_text)
+        return value
+
+    @validator("rating")
+    def validate_rating(cls, value):
+        validate_required_integer(FieldName.REVIEW_RATING.value, value)
+        rating = validate_integer(FieldName.REVIEW_RATING.value, value)
+        validate_invalid(FieldName.REVIEW_RATING.value, str(rating), validate_func=validate_rating)
+        return rating
+
 
 class ReviewDatabaseOut(BaseModel):
     id: PydanticObjectId = Field(alias="_id")
@@ -12,6 +39,29 @@ class ReviewDatabaseOut(BaseModel):
     rating: int
     recipe_id: PydanticObjectId
     created_by: Test
-    created_date: datetime.datetime
+    created_date: datetime
     last_updated_by: PydanticObjectId
-    last_updated_date: datetime.datetime
+    last_updated_date: datetime
+
+
+class ReviewDatabaseIn(BaseModel):
+    text: str
+    rating: int
+    recipe_id: PydanticObjectId
+    created_by: PydanticObjectId
+    created_date: datetime
+    last_updated_by: PydanticObjectId
+    last_updated_date: datetime
+
+    @validator("text")
+    def validate_text(cls, value):
+        validate_required(FieldName.REVIEW_TEXT.value, value)
+        validate_invalid(FieldName.REVIEW_TEXT.value, value, validate_func=validate_review_text)
+        return value
+
+    @validator("rating")
+    def validate_rating(cls, value):
+        validate_required_integer(FieldName.REVIEW_RATING.value, value)
+        rating = validate_integer(FieldName.REVIEW_RATING.value, value)
+        validate_invalid(FieldName.REVIEW_RATING.value, str(rating), validate_func=validate_rating)
+        return rating
