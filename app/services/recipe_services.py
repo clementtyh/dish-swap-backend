@@ -2,7 +2,9 @@ import re
 from core.database import MongoDBConnector
 from bson.objectid import ObjectId
 from exceptions.recipe_exceptions import InvalidRecipeIDException, RecipeNotFoundException
+from exceptions.user_exceptions import InvalidUserIDException
 from models.recipe import RecipeDatabaseIn, RecipeDatabaseUpdate
+from services.flavourmark_services import get_flavourmark
 
 # Get singleton db connection
 recipe_db_collection = MongoDBConnector.get_client()["dishswapdb"]["recipes"]
@@ -116,6 +118,40 @@ async def update_one_recipe(recipe_database_update: RecipeDatabaseUpdate) -> boo
             return True
         else:
             return False
+    except Exception as e:
+        raise e
+    
+async def toggle_recipe_flavourmark(recipe_id, user_id):
+    try:
+        if not ObjectId.is_valid(recipe_id):
+            raise InvalidRecipeIDException(recipe_id)
+        if not ObjectId.is_valid(user_id):
+            raise InvalidUserIDException(user_id)
+        
+        recipe = await recipe_db_collection.find_one({"_id": ObjectId(recipe_id)})
+        if recipe is None:
+            raise InvalidRecipeIDException(recipe_id)
+        
+        flavourmark = await get_flavourmark(recipe_id, user_id)
+
+        if (flavourmark):
+            result = await flavourmark_db_collection.delete_one({"_id": flavourmark["_id"]})
+            if result.deleted_count == 1:
+                return True
+            else:
+                return False
+        else:
+            result = await flavourmark_db_collection.insert_one(
+                {
+                    "recipe_id": ObjectId(recipe_id),
+                    "user_id": ObjectId(user_id)
+                },
+            )
+            if result:
+                return True
+            else:
+                return False
+
     except Exception as e:
         raise e
 

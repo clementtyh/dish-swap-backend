@@ -138,6 +138,20 @@ async def update_recipe(recipe_id: str, recipe_data: Recipe = Body(...), user_id
         logger.error(e)
         raise HTTPException(status_code=400, detail=ErrorOut(message="An unknown error has occurred").model_dump())
     
+@router.post("/flavourmark/{recipe_id}", response_model=SuccessOut)
+async def update_recipe(recipe_id: str, user_id: str = Depends(validate_token)
+):
+    try:
+        result = await toggle_recipe_flavourmark(recipe_id, user_id)
+
+        if result:
+            return SuccessOut(message="Flavourmark for recipe toggled successfully")
+        else:
+            return ErrorOut(message="Failed to toggle flavourmark for recipe")
+    except Exception as e:
+        logger.error(e)
+        raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
+
 @router.post("/delete/{recipe_id}", response_model=SuccessOut)
 async def delete_recipe(recipe_id: str, user_id: str = Depends(validate_token)
 ):
