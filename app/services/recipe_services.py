@@ -6,6 +6,7 @@ from models.recipe import RecipeDatabaseIn, RecipeDatabaseUpdate
 
 # Get singleton db connection
 recipe_db_collection = MongoDBConnector.get_client()["dishswapdb"]["recipes"]
+flavourmark_db_collection = MongoDBConnector.get_client()["dishswapdb"]["flavourmarks"]
 
 async def get_recipes(page, search):
     try:
@@ -21,6 +22,45 @@ async def get_recipes(page, search):
             skip=9*(int(page)-1), 
             limit=9
         )]
+
+        return {"count": count, "recipes": recipes}
+        
+    except Exception as e:
+        raise
+
+async def get_flavourmarked_recipes(page, user_id):
+    try:
+        count = await flavourmark_db_collection.count_documents({"user_id": ObjectId(user_id)})
+        recipes = [doc["recipe"] async for doc in flavourmark_db_collection.aggregate([
+            {
+                "$skip": 9*(int(page)-1)
+            },
+            {
+                "$limit": 9
+            },
+            {
+                "$match": {
+                    "user_id": ObjectId(user_id)
+                }
+            },
+            {
+                "$lookup": {
+                    "from": "recipes",
+                    "localField": "recipe_id",
+                    "foreignField": "_id",
+                    "as": "recipe"
+                }
+            },
+            {
+                "$unwind": "$recipe"
+            },
+            {
+                "$project": {
+                    "recipe": 1,
+                    "_id": 0,
+                }
+            }
+        ])]
 
         return {"count": count, "recipes": recipes}
         
