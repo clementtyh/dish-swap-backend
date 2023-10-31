@@ -28,7 +28,7 @@ async def root(response: Response, page=1, search=""):
         raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
     
 @router.get("/flavourmarks", response_model=List[RecipeDatabaseOut])
-async def root(response: Response, page=1, user_id: str = Depends(validate_token)):
+async def get_user_flavourmarks(response: Response, page=1, user_id: str = Depends(validate_token)):
     try:
         result = await get_flavourmarked_recipes(page, user_id)
         response.headers["X-Total-Count"] = str(result["count"])
@@ -40,7 +40,7 @@ async def root(response: Response, page=1, user_id: str = Depends(validate_token
         raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
 
 @router.get("/{id}", response_model=RecipeDatabaseOut)
-async def getOne(id):
+async def get_one(id):
     try:
         recipe = await get_recipe(id)
 
@@ -49,6 +49,17 @@ async def getOne(id):
     except RecipeNotFoundException as e:
         logger.info(e)
         raise HTTPException(status_code=404, detail=ErrorOut(message=str(e)).model_dump())
+    except Exception as e:
+        logger.error(e)
+        raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
+    
+@router.get("/{id}/flavourmarks", response_model=int)
+async def get_recipe_flavourmarks(id):
+    try:
+        count = await get_flavourmarks_count(id)
+
+        return count
+
     except Exception as e:
         logger.error(e)
         raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
@@ -138,8 +149,8 @@ async def update_recipe(recipe_id: str, recipe_data: Recipe = Body(...), user_id
         logger.error(e)
         raise HTTPException(status_code=400, detail=ErrorOut(message="An unknown error has occurred").model_dump())
     
-@router.post("/flavourmark/{recipe_id}", response_model=SuccessOut)
-async def update_recipe(recipe_id: str, user_id: str = Depends(validate_token)
+@router.post("/{recipe_id}/flavourmark", response_model=SuccessOut)
+async def toggle_flavourmark(recipe_id: str, user_id: str = Depends(validate_token)
 ):
     try:
         result = await toggle_recipe_flavourmark(recipe_id, user_id)
