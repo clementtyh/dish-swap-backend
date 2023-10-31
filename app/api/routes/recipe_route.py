@@ -1,6 +1,6 @@
-from fastapi import APIRouter, HTTPException, Body, Response, Depends
+from fastapi import APIRouter, HTTPException, Body, Response, Depends, Request
 from typing import List
-from services.auth_services import validate_token
+from services.auth_services import validate_token, validate_token_unhandled
 from utils.logger import logger
 from services.recipe_services import *
 from services.review_services import delete_recipe_reviews, get_reviews_count
@@ -39,27 +39,18 @@ async def get_user_flavourmarks(response: Response, page=1, user_id: str = Depen
         logger.error(e)
         raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
 
-@router.get("/{id}", response_model=RecipeDatabaseOut)
-async def get_one(id):
+@router.get("/{recipe_id}", response_model=RecipeDatabaseOut)
+async def get_one(recipe_id, request: Request):
     try:
-        recipe = await get_recipe(id)
+        user_id = validate_token_unhandled(request)
+
+        recipe = await get_recipe(recipe_id, user_id)
 
         return recipe
 
     except RecipeNotFoundException as e:
         logger.info(e)
         raise HTTPException(status_code=404, detail=ErrorOut(message=str(e)).model_dump())
-    except Exception as e:
-        logger.error(e)
-        raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
-    
-@router.get("/{id}/flavourmarks", response_model=int)
-async def get_recipe_flavourmarks(id):
-    try:
-        count = await get_flavourmarks_count(id)
-
-        return count
-
     except Exception as e:
         logger.error(e)
         raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())

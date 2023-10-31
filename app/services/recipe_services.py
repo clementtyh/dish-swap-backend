@@ -4,7 +4,7 @@ from bson.objectid import ObjectId
 from exceptions.recipe_exceptions import InvalidRecipeIDException, RecipeNotFoundException
 from exceptions.user_exceptions import InvalidUserIDException
 from models.recipe import RecipeDatabaseIn, RecipeDatabaseUpdate
-from services.flavourmark_services import get_flavourmark
+from services.flavourmark_services import get_flavourmark, get_flavourmarks_count
 
 # Get singleton db connection
 recipe_db_collection = MongoDBConnector.get_client()["dishswapdb"]["recipes"]
@@ -69,15 +69,25 @@ async def get_flavourmarked_recipes(page, user_id):
     except Exception as e:
         raise
 
-async def get_recipe(id):
+async def get_recipe(recipe_id, user_id):
     try:
-        if not ObjectId.is_valid(id):
-            raise InvalidRecipeIDException(id)
-
-        recipe = await recipe_db_collection.find_one({"_id": ObjectId(id)})
+        if not ObjectId.is_valid(recipe_id):
+            raise InvalidRecipeIDException(recipe_id)
+        
+        recipe = await recipe_db_collection.find_one({"_id": ObjectId(recipe_id)})
 
         if recipe is None:
-            raise RecipeNotFoundException(id)
+            raise RecipeNotFoundException(recipe_id)
+        
+        flavourmarks_count = await get_flavourmarks_count(recipe_id)
+                
+        is_flavourmarked = False
+        if user_id:
+            flavourmark = await get_flavourmark(recipe_id, user_id)
+            is_flavourmarked = bool(flavourmark)
+
+        recipe["flavourmarks_count"] = flavourmarks_count
+        recipe["is_flavourmarked"] = is_flavourmarked
         
         return recipe
         

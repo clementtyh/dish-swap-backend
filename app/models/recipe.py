@@ -163,6 +163,8 @@ class RecipeDatabaseOut(BaseModel):
     created_date: datetime
     last_updated_by: PydanticObjectId
     last_updated_date: datetime
+    flavourmarks_count: int
+    is_flavourmarked: bool
 
 class RecipeDatabaseUpdate(BaseModel):
     recipe_id: str
