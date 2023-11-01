@@ -30,6 +30,20 @@ async def get_recipes(page, search):
     except Exception as e:
         raise
 
+async def get_recipes_user(page, user_id):
+    try:
+        count = await recipe_db_collection.count_documents({"created_by": ObjectId(user_id)})
+        recipes = [recipe async for recipe in recipe_db_collection.find(
+            {"created_by": ObjectId(user_id)}, 
+            skip=9*(int(page)-1), 
+            limit=9
+        )]
+
+        return {"count": count, "recipes": recipes}
+        
+    except Exception as e:
+        raise
+
 async def get_flavourmarked_recipes(page, user_id):
     try:
         count = await flavourmark_db_collection.count_documents({"user_id": ObjectId(user_id)})

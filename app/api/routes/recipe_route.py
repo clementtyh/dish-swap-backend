@@ -27,6 +27,18 @@ async def root(response: Response, page=1, search=""):
         logger.error(e)
         raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
     
+@router.get("/profile", response_model=List[RecipeDatabaseOut])
+async def get_user_recipes(response: Response, page=1, user_id: str = Depends(validate_token)):
+    try:
+        result = await get_recipes_user(page, user_id)
+        response.headers["X-Total-Count"] = str(result["count"])
+
+        return result["recipes"]
+
+    except Exception as e:
+        logger.error(e)
+        raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
+    
 @router.get("/flavourmarks", response_model=List[RecipeDatabaseOut])
 async def get_user_flavourmarks(response: Response, page=1, user_id: str = Depends(validate_token)):
     try:
