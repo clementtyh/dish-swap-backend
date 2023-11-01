@@ -1,5 +1,5 @@
 from pydantic import BaseModel, validator, Field
-from typing import List, Union
+from typing import List
 from utils.validator import *
 from utils.annotations import PydanticObjectId
 from api.routes.file_route import is_valid_cloudinary_image
@@ -163,6 +163,8 @@ class RecipeDatabaseOut(BaseModel):
     created_date: datetime
     last_updated_by: PydanticObjectId
     last_updated_date: datetime
+    flavourmarks_count: int = None
+    is_flavourmarked: bool = None
 
 class RecipeDatabaseUpdate(BaseModel):
     recipe_id: str

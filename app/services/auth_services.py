@@ -50,3 +50,19 @@ def validate_token(request: Request) -> str:
     
     except Exception as e:
         raise
+
+def validate_token_unhandled(request: Request) -> str:
+    try:
+        # Extract the token from the Authorization header
+        auth_header = request.headers.get("Authorization")
+        if not auth_header or not auth_header.startswith("Bearer "):
+            raise HTTPException(status_code=401, detail=ErrorOut(message="Invalid authorization header").model_dump())
+        token = auth_header.split("Bearer ")[1]
+        
+        # Verify the token
+        payload = verify_token(token)
+        
+        return payload['id']
+    
+    except Exception as e:
+        return ""
