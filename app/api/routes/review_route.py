@@ -40,7 +40,7 @@ async def get_user_reviews(response: Response, page=1, user_id: str = Depends(va
 async def create_review(review_data: Review = Body(...), user_id: str = Depends(validate_token)
 ):
     try:
-        recipe_exist = await get_recipe(review_data.recipe_id)
+        recipe_exist = await get_recipe(review_data.recipe_id, user_id)
         
         if recipe_exist:
             review_database_in = ReviewDatabaseIn(

@@ -161,7 +161,7 @@ def validate_max_images(field_name, value):
     
 
 def validate_review_text(value: str):
-    min_length = 10
+    min_length = 1
     max_length = 500
     if not validate_length_range(value, min_length, max_length):
         return False
