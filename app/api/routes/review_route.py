@@ -24,7 +24,18 @@ async def root(response: Response, page=1, recipe=""):
         logger.error(e)
         raise HTTPException(status_code=400, detail=ErrorOut(message="An unknown error has occurred").model_dump())
     
+@router.get("/profile", response_model=List[ProfileReviewDatabaseOut])
+async def get_user_reviews(response: Response, page=1, user_id: str = Depends(validate_token)):
+    try:
+        result = await get_reviews_user(page, user_id)
+        response.headers["X-Total-Count"] = str(result["count"])
 
+        return result["reviews"]
+
+    except Exception as e:
+        logger.error(e)
+        raise HTTPException(status_code=400, detail=ErrorOut(message="An unknown error has occurred").model_dump())
+    
 @router.post("/create")
 async def create_review(review_data: Review = Body(...), user_id: str = Depends(validate_token)
 ):
