@@ -7,15 +7,15 @@ from models.review import ReviewDatabaseIn
 # Get singleton db connection
 review_db_collection = MongoDBConnector.get_client()["dishswapdb"]["reviews"]
 
-async def get_reviews(page, recipe):
+async def get_reviews(page, recipe_id):
     try:
-        if recipe and not ObjectId.is_valid(recipe):
-            raise InvalidRecipeIDException(recipe)
+        if recipe_id and not ObjectId.is_valid(recipe_id):
+            raise InvalidRecipeIDException(recipe_id)
         
-        count = await get_reviews_count(recipe)
+        count = await get_reviews_count(recipe_id)
         pipeline = [
             {
-                "$match": {"recipe_id": ObjectId(recipe)} if recipe else {}
+                "$match": {"recipe_id": ObjectId(recipe_id)} if recipe_id else {}
             },
             {
                 "$skip": 6*(int(page)-1)
@@ -53,6 +53,62 @@ async def get_reviews(page, recipe):
         
     except Exception as e:
         raise
+
+async def get_reviews_user(page, user_id):
+    try:
+        count = await review_db_collection.count_documents({"created_by": ObjectId(user_id)})
+        reviews = [review async for review in review_db_collection.find(
+            {"created_by": ObjectId(user_id)}, 
+            skip=9*(int(page)-1), 
+            limit=9
+        )]
+
+        reviews = [review async for review in review_db_collection.aggregate([
+            {
+                "$match": {"created_by": ObjectId(user_id)} if user_id else {}
+            },
+            {
+                "$skip": 6*(int(page)-1)
+            },
+            {
+                "$limit": 6
+            },
+            {
+                "$lookup": 
+                    {
+                        "from": "recipes",
+                        "localField": "recipe_id",
+                        "foreignField": "_id",
+                        "as": "recipe"
+                    }
+            },
+            {
+                "$unwind": "$recipe"
+            },
+            {
+                "$project": 
+                    {
+                        "recipe":
+                            {
+                                "recipe_description": 0,
+                                "ingredients": 0,
+                                "steps": 0,
+                                "total_time": 0,
+                                "difficulty": 0,
+                                "servings": 0,
+                                "image_files": 0,
+                                "created_by": 0,
+                                "created_date": 0,
+                                "last_updated_by": 0,
+                                "last_updated_date": 0,
+                            }
+                    }
+            }
+        ])]
+
+        return {"count": count, "reviews": reviews}
+    except Exception as e:
+        raise e
 
 async def get_reviews_count(recipe_id):
     try:

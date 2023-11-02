@@ -5,10 +5,13 @@ from utils.annotations import PydanticObjectId
 from datetime import datetime
 from enum import Enum
 
-
-class Test(BaseModel):
+class Creator(BaseModel):
     id: PydanticObjectId = Field(alias="_id")
     display_name: str
+
+class Recipe(BaseModel):
+    id: PydanticObjectId = Field(alias="_id")
+    recipe_name: str
 
 class FieldName(Enum):
     REVIEW_TEXT = "Review text"
@@ -38,11 +41,21 @@ class ReviewDatabaseOut(BaseModel):
     text: str
     rating: int
     recipe_id: PydanticObjectId
-    created_by: Test
+    created_by: Creator
     created_date: datetime
     last_updated_by: PydanticObjectId
     last_updated_date: datetime
 
+class ProfileReviewDatabaseOut(BaseModel):
+    id: PydanticObjectId = Field(alias="_id")
+    text: str
+    rating: int
+    recipe_id: PydanticObjectId
+    created_by: PydanticObjectId
+    created_date: datetime
+    last_updated_by: PydanticObjectId
+    last_updated_date: datetime
+    recipe: Recipe
 
 class ReviewDatabaseIn(BaseModel):
     text: str
