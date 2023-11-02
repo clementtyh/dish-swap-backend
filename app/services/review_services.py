@@ -136,6 +136,18 @@ async def get_review(review_id):
     except Exception as e:
         raise
 
+async def check_review_exists(recipe_id, user_id):
+    try:
+        if not ObjectId.is_valid(recipe_id):
+            raise InvalidRecipeIDException(recipe_id)
+
+        review = await review_db_collection.find_one({"recipe_id": ObjectId(recipe_id), "created_by": ObjectId(user_id)})
+        
+        return bool(review)
+        
+    except Exception as e:
+        raise
+
 async def insert_review(review_database_in: ReviewDatabaseIn) -> str:
     try:
         result = await review_db_collection.insert_one(review_database_in)

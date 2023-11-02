@@ -40,13 +40,20 @@ async def get_user_reviews(response: Response, page=1, user_id: str = Depends(va
 async def create_review(review_data: Review = Body(...), user_id: str = Depends(validate_token)
 ):
     try:
-        recipe_exist = await get_recipe(review_data.recipe_id, user_id)
+        recipe = await get_recipe(review_data.recipe_id, user_id)
+        review_exist = await check_review_exists(review_data.recipe_id, user_id)
+
+        if review_exist:
+            return ErrorOut(message="Cannot create more than 1 review for each recipe")
         
-        if recipe_exist:
+        if recipe["created_by"] == ObjectId(user_id):
+            return ErrorOut(message="Cannot create review for your own recipe")
+
+        if recipe:
             review_database_in = ReviewDatabaseIn(
             text = review_data.text,
             rating = review_data.rating,
-            recipe_id = PydanticObjectId(recipe_exist["_id"]),
+            recipe_id = PydanticObjectId(recipe["_id"]),
             created_by=PydanticObjectId(user_id),
             created_date= datetime.now(),
             last_updated_by=PydanticObjectId(user_id),
