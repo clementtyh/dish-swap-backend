@@ -38,6 +38,32 @@ pipeline {
             }
         }
 
+        stage('Docker Push Stable Backup') {
+            steps {
+                echo 'Pushing Stable Build'
+                script {
+                    def dockerTag = "clementtyh/dishswap-backend:b0.${BUILD_ID.toInteger() - 1}"
+        
+                    sh "docker tag registry.hub.docker.com/clementtyh/dishswap-backend:latest ${dockerTag}"
+
+                    // Log in to Docker Hub and push the image
+                    docker.withRegistry('https://registry.hub.docker.com', 'fd312ca4-a214-47f0-bff0-453e4b3ed27d') {
+                        docker.image("${dockerTag}").push()
+                    }
+                }
+            }
+        }
+
+        stage('Build Container') {
+            steps {
+                echo 'Building Container'
+                // Add deploy steps here
+                sh '''
+                    docker-compose build --no-cache
+                '''
+            }
+        }
+
         stage('Run Test Container') {
             steps {
                 echo 'Running test container...'
@@ -78,32 +104,6 @@ pipeline {
             }
         }
         
-        stage('Docker Push Stable Backup') {
-            steps {
-                echo 'Pushing Stable Build'
-                script {
-                    def dockerTag = "clementtyh/dishswap-backend:b0.${BUILD_ID.toInteger() - 1}"
-        
-                    sh "docker tag registry.hub.docker.com/clementtyh/dishswap-backend:latest ${dockerTag}"
-
-                    // Log in to Docker Hub and push the image
-                    docker.withRegistry('https://registry.hub.docker.com', 'fd312ca4-a214-47f0-bff0-453e4b3ed27d') {
-                        docker.image("${dockerTag}").push()
-                    }
-                }
-            }
-        }
-
-        stage('Build Container') {
-            steps {
-                echo 'Building Container'
-                // Add deploy steps here
-                sh '''
-                    docker-compose build --no-cache
-                '''
-            }
-        }
-
         stage('Container Scan') {
             steps {
                 echo 'Scanning Container'
