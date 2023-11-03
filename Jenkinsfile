@@ -77,7 +77,7 @@ pipeline {
 
         stage('Integration Test') {
             environment {
-                TEST_URL = "http://localhost:8091"
+                TEST_URL = "http://172.17.0.1:8091"
             }
             steps {
                 echo 'Testing...'
