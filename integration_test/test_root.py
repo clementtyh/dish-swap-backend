@@ -4,6 +4,8 @@ import requests
 
 api_url = os.getenv("TEST_URL")
 
+print (api_url)
+
 
 def test_api_endpoint():
     # Make a GET request to the API endpoint
