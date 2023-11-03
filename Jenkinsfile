@@ -33,7 +33,7 @@ pipeline {
                     // Activate the virtual environment
                     sh './venv/bin/activate'
                     // Run pytest to test scripts from app/test folder
-                    sh './venv/bin/pytest app/test'
+                    sh './venv/bin/pytest app/test -s'
                 }
             }
         }
@@ -86,9 +86,9 @@ pipeline {
                     // Activate the virtual environment
                     sh './venv/bin/activate'
                     // Run status check on test container
-                    sh './venv/bin/pytest integration_test/test_root.py'
+                    sh './venv/bin/pytest integration_test/test_root.py -s'
                     // Run full integration test
-                    sh './venv/bin/pytest integration_test/main_test'
+                    sh './venv/bin/pytest integration_test/main_test -s'
                 }
             }
         }
