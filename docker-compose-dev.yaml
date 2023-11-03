@@ -9,7 +9,7 @@ services:
     image: clementtyh/dishswap-backend:dev           # Set custom image name and version
     restart: always
     ports:
-      - "8091:8090"
+      - "8091:8091"
     environment:
       HOST: "0.0.0.0"
       PORT: 8091
