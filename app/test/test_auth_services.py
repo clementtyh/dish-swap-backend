@@ -7,7 +7,6 @@ sys.path.insert(0, parent_dir)
 
 import pytest
 from fastapi import HTTPException
-from fastapi.testclient import TestClient
 from services.auth_services import create_token, verify_token, validate_token
 
 # Assuming your module is named 'your_module' and contains the provided code
