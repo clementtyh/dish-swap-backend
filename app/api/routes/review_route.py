@@ -1,7 +1,7 @@
-from fastapi import APIRouter, HTTPException, Body, Response, Depends
+from fastapi import APIRouter, HTTPException, Body, Response, Request, Depends
 from typing import List
 from services.review_services import *
-from services.auth_services import validate_token
+from services.auth_services import validate_token, validate_token_unhandled
 from models.response import ErrorOut, SuccessOut
 from models.review import *
 from utils.logger import logger
@@ -13,9 +13,10 @@ router = APIRouter()
 
 
 @router.get("/", response_model=List[ReviewDatabaseOut])
-async def root(response: Response, page=1, recipe=""):
+async def root(response: Response, request: Request, page=1, recipe=""):
     try:
-        result = await get_reviews(page, recipe)
+        user_id = validate_token_unhandled(request)
+        result = await get_reviews(page, recipe, user_id)
         response.headers["X-Total-Count"] = str(result["count"])
 
         return result["reviews"]

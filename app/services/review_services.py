@@ -7,7 +7,7 @@ from models.review import ReviewDatabaseIn
 # Get singleton db connection
 review_db_collection = MongoDBConnector.get_client()["dishswapdb"]["reviews"]
 
-async def get_reviews(page, recipe_id):
+async def get_reviews(page, recipe_id, user_id):
     try:
         if recipe_id and not ObjectId.is_valid(recipe_id):
             raise InvalidRecipeIDException(recipe_id)
@@ -16,6 +16,16 @@ async def get_reviews(page, recipe_id):
         pipeline = [
             {
                 "$match": {"recipe_id": ObjectId(recipe_id)} if recipe_id else {}
+            },
+            {
+                "$addFields": {
+                    "startsWithKey": { "$eq": [ "$created_by", ObjectId(user_id) if user_id else None ]}
+                }
+            },
+            {
+                "$sort": {
+                    "startsWithKey": -1
+                }
             },
             {
                 "$skip": 6*(int(page)-1)
@@ -47,7 +57,7 @@ async def get_reviews(page, recipe_id):
                     }
             }
         ]
-        reviews = await review_db_collection.aggregate(pipeline).to_list(None)
+        reviews = [doc async for doc in review_db_collection.aggregate(pipeline)]
 
         return {"count": count, "reviews": reviews}
         
