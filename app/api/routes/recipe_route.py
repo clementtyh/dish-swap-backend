@@ -209,4 +209,3 @@ async def delete_recipe(recipe_id: str, user_id: str = Depends(validate_token)
     except Exception as e:
         logger.error(e)
         raise HTTPException(status_code=400, detail=ErrorOut(message="An unknown error has occurred").model_dump())
-    

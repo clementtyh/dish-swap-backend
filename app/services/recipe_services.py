@@ -31,7 +31,7 @@ async def get_recipes(page, search):
         raise
 
 async def get_recipes_user(page, user_id):
-    try:      
+    try:
         count = await recipe_db_collection.count_documents({"created_by": ObjectId(user_id)})
         recipes = [recipe async for recipe in recipe_db_collection.find(
             {"created_by": ObjectId(user_id)}, 
@@ -149,6 +149,9 @@ async def toggle_recipe_flavourmark(recipe_id, user_id):
     try:
         if not ObjectId.is_valid(recipe_id):
             raise InvalidRecipeIDException(recipe_id)
+        
+        if not ObjectId.is_valid(user_id):
+            raise InvalidUserIDException(user_id)
         
         recipe = await recipe_db_collection.find_one({"_id": ObjectId(recipe_id)})
         if recipe is None:
