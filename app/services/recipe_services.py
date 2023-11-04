@@ -149,6 +149,7 @@ async def toggle_recipe_flavourmark(recipe_id, user_id):
     try:
         if not ObjectId.is_valid(recipe_id):
             raise InvalidRecipeIDException(recipe_id)
+        
         if not ObjectId.is_valid(user_id):
             raise InvalidUserIDException(user_id)
         
