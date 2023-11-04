@@ -47,7 +47,7 @@ async def create_review(review_data: Review = Body(...), user_id: str = Depends(
         if review_exist:
             return ErrorOut(message="Cannot create more than 1 review for each recipe")
         
-        if validate_is_original_user(recipe["created_by"], user_id):
+        if recipe["created_by"] == ObjectId(user_id):
             return ErrorOut(message="Cannot create review for your own recipe")
 
         if recipe:
@@ -79,7 +79,7 @@ async def delete_review(review_id: str, user_id: str = Depends(validate_token)
     try:
         existing_review = await get_review(review_id)
 
-        if not validate_is_original_user(str(existing_review['created_by']), user_id):
+        if user_id != str(existing_review['created_by']):
             raise UnauthorisedReviewModificationException(review_id)
 
         delete_review_success = await delete_one_review(review_id)

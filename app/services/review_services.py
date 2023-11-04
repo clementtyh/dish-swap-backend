@@ -2,7 +2,6 @@ from core.database import MongoDBConnector
 from bson.objectid import ObjectId
 from exceptions.recipe_exceptions import InvalidRecipeIDException
 from exceptions.review_exceptions import InvalidReviewIDException, ReviewNotFoundException
-from exceptions.user_exceptions import InvalidUserIDException
 from models.review import ReviewDatabaseIn
  
 # Get singleton db connection
@@ -151,10 +150,7 @@ async def check_review_exists(recipe_id, user_id):
     try:
         if not ObjectId.is_valid(recipe_id):
             raise InvalidRecipeIDException(recipe_id)
-        
-        if not ObjectId.is_valid(user_id):
-            raise InvalidUserIDException(user_id)
-        
+
         review = await review_db_collection.find_one({"recipe_id": ObjectId(recipe_id), "created_by": ObjectId(user_id)})
         
         return bool(review)

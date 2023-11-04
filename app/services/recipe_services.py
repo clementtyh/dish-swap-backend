@@ -31,7 +31,7 @@ async def get_recipes(page, search):
         raise
 
 async def get_recipes_user(page, user_id):
-    try:      
+    try:
         count = await recipe_db_collection.count_documents({"created_by": ObjectId(user_id)})
         recipes = [recipe async for recipe in recipe_db_collection.find(
             {"created_by": ObjectId(user_id)}, 
