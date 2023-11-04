@@ -99,9 +99,9 @@ async def create_recipe(recipe_data: Recipe = Body(...), user_id: str = Depends(
 async def update_recipe(recipe_id: str, recipe_data: Recipe = Body(...), user_id: str = Depends(validate_token)
 ):
     try:
-        existing_recipe = await get_recipe(recipe_id)
+        existing_recipe = await get_recipe(recipe_id, user_id)
 
-        if user_id != str(existing_recipe['created_by']):
+        if not validate_is_original_user(str(existing_recipe['created_by']), user_id):
             raise UnauthorisedRecipeModificationException(existing_recipe['recipe_name'])
 
         existing_image_urls = existing_recipe.get("image_files", [])
@@ -170,9 +170,9 @@ async def toggle_flavourmark(recipe_id: str, user_id: str = Depends(validate_tok
 async def delete_recipe(recipe_id: str, user_id: str = Depends(validate_token)
 ):
     try:
-        existing_recipe = await get_recipe(recipe_id)
+        existing_recipe = await get_recipe(recipe_id, user_id)
 
-        if user_id != str(existing_recipe['created_by']):
+        if not validate_is_original_user(str(existing_recipe['created_by']), user_id):
             raise UnauthorisedRecipeModificationException(existing_recipe['recipe_name'])
 
         existing_image_urls = existing_recipe.get("image_files", [])
@@ -209,3 +209,4 @@ async def delete_recipe(recipe_id: str, user_id: str = Depends(validate_token)
     except Exception as e:
         logger.error(e)
         raise HTTPException(status_code=400, detail=ErrorOut(message="An unknown error has occurred").model_dump())
+    
