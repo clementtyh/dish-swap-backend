@@ -32,9 +32,6 @@ async def get_recipes(page, search):
 
 async def get_recipes_user(page, user_id):
     try:
-        if not ObjectId.is_valid(user_id):
-            raise InvalidUserIDException(user_id)
-        
         count = await recipe_db_collection.count_documents({"created_by": ObjectId(user_id)})
         recipes = [recipe async for recipe in recipe_db_collection.find(
             {"created_by": ObjectId(user_id)}, 
@@ -49,9 +46,6 @@ async def get_recipes_user(page, user_id):
 
 async def get_flavourmarked_recipes(page, user_id):
     try:
-        if not ObjectId.is_valid(user_id):
-            raise InvalidUserIDException(user_id)
-        
         count = await flavourmark_db_collection.count_documents({"user_id": ObjectId(user_id)})
         recipes = [doc["recipe"] async for doc in flavourmark_db_collection.aggregate([
             {
@@ -93,9 +87,6 @@ async def get_recipe(recipe_id, user_id):
     try:
         if not ObjectId.is_valid(recipe_id):
             raise InvalidRecipeIDException(recipe_id)
-        
-        if not ObjectId.is_valid(user_id):
-            raise InvalidUserIDException(user_id)
         
         recipe = await recipe_db_collection.find_one({"_id": ObjectId(recipe_id)})
 
@@ -158,7 +149,6 @@ async def toggle_recipe_flavourmark(recipe_id, user_id):
     try:
         if not ObjectId.is_valid(recipe_id):
             raise InvalidRecipeIDException(recipe_id)
-        
         if not ObjectId.is_valid(user_id):
             raise InvalidUserIDException(user_id)
         

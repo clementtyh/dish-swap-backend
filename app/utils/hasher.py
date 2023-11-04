@@ -1,6 +1,5 @@
 import bcrypt
 from exceptions.user_exceptions import InvalidPasswordException
-from utils.logger import logger
 
 def hash_password(password: str):
     try:
@@ -12,7 +11,7 @@ def hash_password(password: str):
         return hashed_password
     
     except Exception as e:
-        logger.error(e)
+        print(e)
         raise
 
 
@@ -24,5 +23,5 @@ def validate_password(challenge_password: str, hashed_password: str):
             raise InvalidPasswordException
 
     except Exception as e:
-        logger.error(e)
+        print(e)
         raise
