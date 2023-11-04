@@ -173,3 +173,6 @@ def validate_rating(value: str):
     if not re.match(servings_pattern, value):
         return False
     return True
+
+def validate_is_original_user(db_user_id, user_id):
+    return db_user_id == user_id
