@@ -13,9 +13,6 @@ async def get_reviews(page, recipe_id, user_id):
         if recipe_id and not ObjectId.is_valid(recipe_id):
             raise InvalidRecipeIDException(recipe_id)
         
-        if not ObjectId.is_valid(user_id):
-            raise InvalidUserIDException(user_id)
-        
         count = await get_reviews_count(recipe_id)
         pipeline = [
             {
@@ -70,9 +67,6 @@ async def get_reviews(page, recipe_id, user_id):
 
 async def get_reviews_user(page, user_id):
     try:
-        if not ObjectId.is_valid(user_id):
-            raise InvalidUserIDException(user_id)
-        
         count = await review_db_collection.count_documents({"created_by": ObjectId(user_id)})
         reviews = [review async for review in review_db_collection.find(
             {"created_by": ObjectId(user_id)}, 
