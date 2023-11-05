@@ -71,6 +71,7 @@ pipeline {
                 script {
                     // Up container
                     sh 'docker-compose -f docker-compose-dev.yaml up -d'
+                    sleep 15
                 }
             }
         }
