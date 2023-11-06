@@ -116,7 +116,7 @@ async def update_recipe(recipe_id: str, recipe_data: Recipe = Body(...), user_id
         
         if not images_to_delete or (images_to_delete and image_delete_success):
             recipe_database_update = RecipeDatabaseUpdate(
-                recipe_id = recipe_id,
+                recipe_id = PydanticObjectId(recipe_id),
                 recipe_name=recipe_data.recipe_name,
                 recipe_description=recipe_data.recipe_description,
                 ingredients=recipe_data.ingredients,

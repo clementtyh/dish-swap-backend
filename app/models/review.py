@@ -16,6 +16,7 @@ class Recipe(BaseModel):
 class FieldName(Enum):
     REVIEW_TEXT = "Review text"
     REVIEW_RATING = "Rating"
+    RECIPE_ID = "Recipe ID"
 
 class Review(BaseModel):
     text: str
@@ -34,7 +35,12 @@ class Review(BaseModel):
         rating = validate_integer(FieldName.REVIEW_RATING.value, value)
         validate_invalid(FieldName.REVIEW_RATING.value, str(rating), validate_func=validate_rating)
         return rating
-
+    
+    @validator("recipe_id")
+    def validate_recipe_id(cls, value):
+        validate_required(FieldName.RECIPE_ID.value, value)
+        return value
+    
 class ReviewDatabaseIn(Review):
     created_by: PydanticObjectId
     created_date: datetime
