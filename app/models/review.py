@@ -20,7 +20,7 @@ class FieldName(Enum):
 class Review(BaseModel):
     text: str
     rating: int
-    recipe_id: str
+    recipe_id: PydanticObjectId
 
     @validator("text")
     def validate_text(cls, value):
