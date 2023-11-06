@@ -93,7 +93,7 @@ class RecipeDatabaseOut(RecipeDatabaseIn):
     is_flavourmarked: bool = None
 
 class RecipeDatabaseUpdate(Recipe):
-    recipe_id: str
+    recipe_id: PydanticObjectId
     last_updated_by: PydanticObjectId
     last_updated_date: datetime
 
