@@ -9,7 +9,7 @@ class Creator(BaseModel):
     id: PydanticObjectId = Field(alias="_id")
     display_name: str
 
-class Recipe(BaseModel):
+class RecipeInfo(BaseModel):
     id: PydanticObjectId = Field(alias="_id")
     recipe_name: str
 
@@ -56,4 +56,4 @@ class ReviewDatabaseOut(Review):
 
 class ProfileReviewDatabaseOut(ReviewDatabaseIn):
     id: PydanticObjectId = Field(alias="_id")
-    recipe: Recipe
+    recipe: RecipeInfo
