@@ -35,46 +35,19 @@ class Review(BaseModel):
         validate_invalid(FieldName.REVIEW_RATING.value, str(rating), validate_func=validate_rating)
         return rating
 
-
-class ReviewDatabaseOut(BaseModel):
+class ReviewDatabaseIn(Review):
+    created_by: PydanticObjectId
+    created_date: datetime
+    last_updated_by: PydanticObjectId
+    last_updated_date: datetime
+    
+class ReviewDatabaseOut(Review):
     id: PydanticObjectId = Field(alias="_id")
-    text: str
-    rating: int
-    recipe_id: PydanticObjectId
     created_by: Creator
     created_date: datetime
     last_updated_by: PydanticObjectId
     last_updated_date: datetime
 
-class ProfileReviewDatabaseOut(BaseModel):
+class ProfileReviewDatabaseOut(ReviewDatabaseIn):
     id: PydanticObjectId = Field(alias="_id")
-    text: str
-    rating: int
-    recipe_id: PydanticObjectId
-    created_by: PydanticObjectId
-    created_date: datetime
-    last_updated_by: PydanticObjectId
-    last_updated_date: datetime
     recipe: Recipe
-
-class ReviewDatabaseIn(BaseModel):
-    text: str
-    rating: int
-    recipe_id: PydanticObjectId
-    created_by: PydanticObjectId
-    created_date: datetime
-    last_updated_by: PydanticObjectId
-    last_updated_date: datetime
-
-    @validator("text")
-    def validate_text(cls, value):
-        validate_required(FieldName.REVIEW_TEXT.value, value)
-        validate_invalid(FieldName.REVIEW_TEXT.value, value, validate_func=validate_review_text)
-        return value
-
-    @validator("rating")
-    def validate_rating(cls, value):
-        validate_required_integer(FieldName.REVIEW_RATING.value, value)
-        rating = validate_integer(FieldName.REVIEW_RATING.value, value)
-        validate_invalid(FieldName.REVIEW_RATING.value, str(rating), validate_func=validate_rating)
-        return rating
