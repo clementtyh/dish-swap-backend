@@ -16,6 +16,7 @@ class Recipe(BaseModel):
 class FieldName(Enum):
     REVIEW_TEXT = "Review text"
     REVIEW_RATING = "Rating"
+    RECIPE_ID = "Recipe ID"
 
 class Review(BaseModel):
     text: str
