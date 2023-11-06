@@ -67,21 +67,16 @@ async def get_reviews(page, recipe_id, user_id):
 async def get_reviews_user(page, user_id):
     try:
         count = await review_db_collection.count_documents({"created_by": ObjectId(user_id)})
-        reviews = [review async for review in review_db_collection.find(
-            {"created_by": ObjectId(user_id)}, 
-            skip=9*(int(page)-1), 
-            limit=9
-        )]
 
         reviews = [review async for review in review_db_collection.aggregate([
             {
                 "$match": {"created_by": ObjectId(user_id)} if user_id else {}
             },
             {
-                "$skip": 6*(int(page)-1)
+                "$skip": 9*(int(page)-1)
             },
             {
-                "$limit": 6
+                "$limit": 9
             },
             {
                 "$lookup": 
