@@ -49,15 +49,15 @@ async def get_flavourmarked_recipes(page, user_id):
         count = await flavourmark_db_collection.count_documents({"user_id": ObjectId(user_id)})
         recipes = [doc["recipe"] async for doc in flavourmark_db_collection.aggregate([
             {
+                "$match": {
+                    "user_id": ObjectId(user_id)
+                }
+            },
+            {
                 "$skip": 9*(int(page)-1)
             },
             {
                 "$limit": 9
-            },
-            {
-                "$match": {
-                    "user_id": ObjectId(user_id)
-                }
             },
             {
                 "$lookup": {
