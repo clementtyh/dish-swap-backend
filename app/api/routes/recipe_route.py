@@ -96,10 +96,9 @@ async def create_recipe(recipe_data: Recipe = Body(...), user_id: str = Depends(
         raise HTTPException(status_code=500, detail=ErrorOut(message=str(e)).model_dump())
 
 @router.post("/update/{recipe_id}", response_model=SuccessOut)
-async def update_recipe(recipe_id: str, recipe_data: Recipe = Body(...)#, user_id: str = Depends(validate_token)
+async def update_recipe(recipe_id: str, recipe_data: Recipe = Body(...), user_id: str = Depends(validate_token)
 ):
     try:
-        user_id = "6533e17447cbaceb0740243f"
         existing_recipe = await get_recipe(recipe_id, user_id)
 
         if not validate_is_original_user(str(existing_recipe['created_by']), user_id):
