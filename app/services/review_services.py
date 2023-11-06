@@ -7,7 +7,7 @@ from models.review import ReviewDatabaseIn
 # Get singleton db connection
 review_db_collection = MongoDBConnector.get_client()["dishswapdb"]["reviews"]
 
-async def get_reviews(page, recipe_id, user_id):
+async def get_reviews(page: int, recipe_id: str, user_id: str):
     try:
         if recipe_id and not ObjectId.is_valid(recipe_id):
             raise InvalidRecipeIDException(recipe_id)
@@ -24,7 +24,7 @@ async def get_reviews(page, recipe_id, user_id):
             },
             {
                 "$sort": {
-                    "startsWithKey": -1
+                    "startsWithKey": -1 
                 }
             },
             {
@@ -64,7 +64,7 @@ async def get_reviews(page, recipe_id, user_id):
     except Exception as e:
         raise
 
-async def get_reviews_user(page, user_id):
+async def get_reviews_user(page: int, user_id: str):
     try:
         count = await review_db_collection.count_documents({"created_by": ObjectId(user_id)})
 
@@ -115,7 +115,7 @@ async def get_reviews_user(page, user_id):
     except Exception as e:
         raise e
 
-async def get_reviews_count(recipe_id):
+async def get_reviews_count(recipe_id: str):
     try:
         if recipe_id and not ObjectId.is_valid(recipe_id):
             raise InvalidRecipeIDException(recipe_id)
@@ -126,7 +126,7 @@ async def get_reviews_count(recipe_id):
     except Exception as e:
         raise e
 
-async def get_review(review_id):
+async def get_review(review_id: str):
     try:
         if not ObjectId.is_valid(review_id):
             raise InvalidReviewIDException(review_id)
@@ -141,7 +141,7 @@ async def get_review(review_id):
     except Exception as e:
         raise
 
-async def check_review_exists(recipe_id, user_id):
+async def check_review_exists(recipe_id: str, user_id: str):
     try:
         if not ObjectId.is_valid(recipe_id):
             raise InvalidRecipeIDException(recipe_id)

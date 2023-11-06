@@ -4,7 +4,7 @@ from exceptions.recipe_exceptions import InvalidRecipeIDException
 
 flavourmark_db_collection = MongoDBConnector.get_client()["dishswapdb"]["flavourmarks"]
 
-async def get_flavourmark(recipe_id, user_id):
+async def get_flavourmark(recipe_id: str, user_id: str):
     try:
         if recipe_id and not ObjectId.is_valid(recipe_id):
             raise InvalidRecipeIDException(recipe_id)
@@ -18,7 +18,7 @@ async def get_flavourmark(recipe_id, user_id):
     except Exception as e:
         raise e
 
-async def get_flavourmarks_count(recipe_id):
+async def get_flavourmarks_count(recipe_id: str):
     try:
         if recipe_id and not ObjectId.is_valid(recipe_id):
             raise InvalidRecipeIDException(recipe_id)
