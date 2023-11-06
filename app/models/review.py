@@ -38,7 +38,7 @@ class Review(BaseModel):
     
     @validator("recipe_id")
     def validate_recipe_id(cls, value):
-        validate_required(FieldName.RECIPE_ID.value, value)
+        validate_required(FieldName.RECIPE_ID.value, str(value))
         return value
     
 class ReviewDatabaseIn(Review):
