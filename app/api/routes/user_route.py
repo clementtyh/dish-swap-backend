@@ -1,20 +1,14 @@
 
-from fastapi import APIRouter, HTTPException, Body, Request, Depends
+from fastapi import APIRouter, HTTPException, Body, Depends
 
 from models.response import SuccessOut, ErrorOut
-from models.user import UserRegister, UserDatabaseIn, UserUpdatePassword, UserUpdateDisplayName
+from models.user import UserRegisterModel, UserUpdatePasswordModel, UserUpdateDisplayNameModel
 
-
-from utils.hasher import hash_password
 from utils.logger import logger
 
-from utils.hasher import hash_password, validate_password
-
-
-from services.user_services import get_user, create_user, is_display_name_exists, check_passwords, check_user_exist, update_password_by_id, update_display_name_by_id, check_passwords_not_same, get_user_database_out_with_id 
 from services.auth_services import validate_token
-
-from exceptions.user_exceptions import DisplayNameExistException, UserAlreadyExistsException, PasswordsDoNotMatchException, PasswordsMatchException, UserIdNotFoundException, InvalidPasswordException
+from services.user_services import User
+from exceptions.user_exceptions import UserNotFoundException, DisplayNameExistException, UserAlreadyExistsException, PasswordsDoNotMatchException, PasswordsMatchException, UserIdNotFoundException, InvalidPasswordException
 
 
 router = APIRouter()
@@ -27,17 +21,11 @@ async def root():
 
 
 @router.post("/register")
-async def register(user_register: UserRegister  = Body(...)):
+async def register(user_register_model: UserRegisterModel  = Body(...)):
     try:
-        check_passwords(user_register.password, user_register.confirm_password)
+        user = User(user_register_model)
 
-        await check_user_exist(user_register.email, user_register.display_name)
-
-        hashed_password = hash_password(user_register.password)
-
-        user_database_in = UserDatabaseIn(email=user_register.email, display_name=user_register.display_name, hashed_password=hashed_password, user_type="user")
-
-        await create_user(user_database_in)
+        await user.create_user()
 
         return SuccessOut(message="User registered successfully")
     
@@ -53,18 +41,20 @@ async def register(user_register: UserRegister  = Body(...)):
 
 
 @router.get("/get_user")
-async def update_password(user_id: str = Depends(validate_token)):
+async def get_user(user_id: str = Depends(validate_token)):
     try:
-        user = await get_user(user_id)
+        user = User()
+
+        user.set_id(user_id)
 
         payload = {
-            "email": user.email, 
-            "display_name": user.display_name, 
+            "email": user.get_email(), 
+            "display_name": user.get_display_name(), 
         }
 
         return SuccessOut(payload=payload)
     
-    except UserIdNotFoundException as e:
+    except UserNotFoundException as e:
         logger.info(e)
         raise HTTPException(status_code=400, detail=ErrorOut(message=str(e)).model_dump())
     except Exception as e:
@@ -73,20 +63,15 @@ async def update_password(user_id: str = Depends(validate_token)):
     
 
 @router.post("/update_password")
-async def update_password(user_update_password: UserUpdatePassword  = Body(...), user_id: str = Depends(validate_token)):
+async def update_password(user_update_password_model: UserUpdatePasswordModel  = Body(...), user_id: str = Depends(validate_token)):
     try:
-        challenge_password = user_update_password.current_password
-        new_password = user_update_password.new_password
+        user = User(user_update_password_model)
 
-        check_passwords_not_same(challenge_password, new_password)
+        user.set_id(user_id)
 
-        user_info = await get_user_database_out_with_id(user_id)
-            
-        validate_password(challenge_password, user_info.hashed_password)
-        
-        new_hashed_password = hash_password(new_password)
+        await user.get_user()
 
-        await update_password_by_id(user_id, new_hashed_password)
+        await user.update_password()
 
         return SuccessOut(message="Password updated successfully")
     
@@ -102,16 +87,20 @@ async def update_password(user_update_password: UserUpdatePassword  = Body(...),
     except Exception as e:
         logger.error(e)
         raise HTTPException(status_code=400, detail=ErrorOut(message="An unknown error has occurred").model_dump())
-
+    
 
 @router.post("/update_display_name")
-async def update_display_name(user_update_display_name: UserUpdateDisplayName  = Body(...), user_id: str = Depends(validate_token)):
+async def update_display_name(user_update_display_name_model: UserUpdateDisplayNameModel  = Body(...), user_id: str = Depends(validate_token)):
     try:
-        display_name = user_update_display_name.new_display_name
+        user = User()
 
-        await is_display_name_exists(display_name)
+        user.set_id(user_id)
 
-        await update_display_name_by_id(user_id, user_update_display_name.new_display_name)
+        await user.get_user()
+
+        user.set_display_name(user_update_display_name_model.new_display_name)
+        print(user_update_display_name_model.new_display_name)
+        await user.update_display_name()
 
         return SuccessOut(message="Display name updated successfully")
 

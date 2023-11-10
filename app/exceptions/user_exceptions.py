@@ -35,9 +35,14 @@ class UserNotFoundException(Exception):
 
 
 class UserIdNotFoundException(Exception):
-    def __init__(self, id):
-        self.id = id
+    def __init__(self):
         super().__init__(f"User id not found")
+
+
+class UserNotFoundException(Exception):
+    def __init__(self):
+        super().__init__(f"User not found")
+
 
 class InvalidUserIDException(Exception):
     def __init__(self, id):

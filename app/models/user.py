@@ -4,7 +4,7 @@ from utils.validator import validate_email, validate_display_name, validate_pass
 from models.response import ErrorOut
 
 
-class User(BaseModel):
+class UserModel(BaseModel):
     email: str
     display_name: str
 
@@ -21,7 +21,7 @@ class User(BaseModel):
         return value
     
 
-class UserRegister(User):
+class UserRegisterModel(UserModel):
     password: str
     confirm_password: str
 
@@ -38,19 +38,19 @@ class UserRegister(User):
         return value
 
 
-class UserInfo(User):
+class UserInfoModel(UserModel):
     user_type: str
 
 
-class UserDatabaseIn(UserInfo):
+class UserDatabaseInModel(UserInfoModel):
     hashed_password: str
 
 
-class UserDatabaseOut(UserDatabaseIn):
+class UserDatabaseOutModel(UserDatabaseInModel):
     id: str = Field(alias="_id")
 
 
-class UserUpdatePassword(BaseModel):
+class UserUpdatePasswordModel(BaseModel):
     current_password: str
     new_password: str
 
@@ -67,7 +67,7 @@ class UserUpdatePassword(BaseModel):
         return value
 
 
-class UserUpdateDisplayName(BaseModel):
+class UserUpdateDisplayNameModel(BaseModel):
     new_display_name: str
 
     @validator("new_display_name")
@@ -75,4 +75,5 @@ class UserUpdateDisplayName(BaseModel):
         if not validate_display_name(value):
             raise HTTPException(status_code=400, detail="Invalid display name")
         return value
-    
+
+
