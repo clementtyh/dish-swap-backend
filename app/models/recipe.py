@@ -2,7 +2,7 @@ from pydantic import BaseModel, validator, Field
 from typing import List
 from utils.validator import *
 from utils.annotations import PydanticObjectId
-from api.routes.file_route import is_valid_cloudinary_image
+from services.file_services import FileServices
 from datetime import datetime
 from enum import Enum
 
@@ -78,7 +78,7 @@ class Recipe(BaseModel):
         validate_max_images(FieldName.IMAGE_FILES.value, len(value))
         for image_url in value:
             validate_required(FieldName.IMAGE_FILES.value, image_url)
-            validate_invalid(FieldName.IMAGE_FILES.value, image_url, validate_func=is_valid_cloudinary_image)
+            validate_invalid(FieldName.IMAGE_FILES.value, image_url, validate_func=FileServices().is_valid_cloudinary_image)
         return value
 
 class RecipeDatabaseIn(Recipe):

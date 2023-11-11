@@ -9,7 +9,7 @@ from models.response import ErrorOut, SuccessOut
 from models.recipe import *
 from exceptions.recipe_exceptions import *
 from datetime import datetime
-from api.routes.file_route import delete_cloudinary_images
+from services.file_services import FileServices
 
 
 router = APIRouter()
@@ -116,7 +116,7 @@ async def update_recipe(recipe_id: str, recipe_data: Recipe = Body(...), user_id
         
         image_delete_success = False
         if images_to_delete:
-            image_delete_success = await delete_cloudinary_images(images_to_delete)
+            image_delete_success = await FileServices().delete_cloudinary_images(images_to_delete)
         
         if not images_to_delete or (images_to_delete and image_delete_success):
             recipe_database_update = RecipeDatabaseUpdate(
@@ -185,7 +185,7 @@ async def delete_recipe(recipe_id: str, user_id: str = Depends(AuthenticationSer
         image_delete_success, delete_reviews_success, delete_flavourmark_success,\
         delete_recipe_success = False, False, False, False
         if existing_image_urls:
-            image_delete_success = await delete_cloudinary_images(existing_image_urls)
+            image_delete_success = await FileServices().delete_cloudinary_images(existing_image_urls)
 
         review_count = await get_reviews_count(recipe_id)
         if review_count > 0:
