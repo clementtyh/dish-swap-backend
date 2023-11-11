@@ -4,8 +4,8 @@ from core.database import MongoDBConnector
 
 from exceptions.user_exceptions import UserNotFoundException, UserAlreadyExistsException, DisplayNameExistException, PasswordsDoNotMatchException, UserNotFoundException, PasswordsMatchException, UserIdNotFoundException
 from models.user import UserModel, UserDatabaseInModel, UserDatabaseOutModel
-
-from utils.hasher import hash_password, validate_password
+from services.auth_services import AuthenticationServices
+from utils.hasher import hash_password
 
 # Get singleton db connection 
 user_db_collection = MongoDBConnector.get_client()["dishswapdb"]["users"] 
@@ -125,7 +125,7 @@ class User():
             raise
     
 
-    async def get_user(self) -> None:
+    async def get_user_by_id(self) -> None:
         try:
             user = await user_db_collection.find_one({"_id": ObjectId(self.__id)})
             
@@ -144,13 +144,34 @@ class User():
         
         except Exception as e:
             raise
+
+    
+    async def get_user_by_email(self) -> None:
+        try:
+            user = await user_db_collection.find_one({"email": self.__email})
+            
+            if user:
+                user["_id"] = str(user["_id"])
+                
+                user_database_out_model = UserDatabaseOutModel(**user)
+
+                self.__id = user_database_out_model.id
+                self.__display_name = user_database_out_model.display_name
+                self.__hashed_password = user_database_out_model.hashed_password
+
+                return
+            
+            raise UserNotFoundException()
+        
+        except Exception as e:
+            raise
     
 
     async def update_password(self):
         try:
             self.user_services.check_if_passwords_not_match(self.__current_password, self.__new_password)
 
-            validate_password(self.__current_password, self.__hashed_password)
+            AuthenticationServices().validate_password(self.__current_password, self.__hashed_password)
 
             self.__hashed_password = hash_password(self.__new_password)
 

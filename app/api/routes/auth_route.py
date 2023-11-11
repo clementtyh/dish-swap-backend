@@ -3,11 +3,10 @@ from fastapi import APIRouter, Depends, HTTPException, Body, Request
 from models.auth import Login
 from models.response import SuccessOut, ErrorOut
 
-from utils.hasher import validate_password
 from utils.logger import logger
 
-from services.user_services import get_user_database_out
-from services.auth_services import create_token, validate_token
+from services.user_services import User
+from services.auth_services import AuthenticationServices
 
 from exceptions.user_exceptions import UserNotFoundException, InvalidPasswordException
 
@@ -26,13 +25,17 @@ async def login(login: Login  = Body(...)):
     challenge_password = login.password
 
     try:
-        user_info = await get_user_database_out(challenge_email)
+        user = User()
+        user.set_email(challenge_email)
+        await user.get_user_by_email()
 
-        validate_password(challenge_password, user_info.hashed_password)
+        authentication_services = AuthenticationServices()
+
+        authentication_services.validate_password(challenge_password, user.get_hashed_password())
 
         minutes_to_expire = 60
 
-        token = create_token({"id": user_info.id}, minutes_to_expire)
+        token = authentication_services.create_token({"id": user.get_id()}, minutes_to_expire)
 
         payload = {
             "token": token, 
@@ -54,7 +57,7 @@ async def login(login: Login  = Body(...)):
 
 
 @router.post("/verify")
-async def verify(user_id: str = Depends(validate_token)):
+async def verify(user_id: str = Depends(AuthenticationServices().validate_token)):
     try:
         return SuccessOut(message="Token is valid")
     except Exception as e:

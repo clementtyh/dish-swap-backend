@@ -2,6 +2,7 @@ from fastapi import HTTPException, APIRouter, Depends
 from services.auth_services import validate_token
 from utils.validator import validate_file_size
 from utils.logger import logger
+from services.auth_services import AuthenticationServices
 from models.response import ErrorOut
 import cloudinary
 import cloudinary.uploader
@@ -29,7 +30,7 @@ cloudinary.config(
 
 
 @router.post("/upload_params") 
-async def get_upload_url(user_id: str = Depends(validate_token)): 
+async def get_upload_url(user_id: str = Depends(AuthenticationServices().validate_token)): 
     try: 
         upload_preset = "ml_default" 
         timestamp = int(time.time()) + 600 

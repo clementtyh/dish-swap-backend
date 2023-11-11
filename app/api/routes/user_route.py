@@ -6,7 +6,7 @@ from models.user import UserRegisterModel, UserUpdatePasswordModel, UserUpdateDi
 
 from utils.logger import logger
 
-from services.auth_services import validate_token
+from services.auth_services import AuthenticationServices
 from services.user_services import User
 from exceptions.user_exceptions import UserNotFoundException, DisplayNameExistException, UserAlreadyExistsException, PasswordsDoNotMatchException, PasswordsMatchException, UserIdNotFoundException, InvalidPasswordException
 
@@ -41,7 +41,7 @@ async def register(user_register_model: UserRegisterModel  = Body(...)):
 
 
 @router.get("/get_user")
-async def get_user(user_id: str = Depends(validate_token)):
+async def get_user(user_id: str = Depends(AuthenticationServices().validate_token)):
     try:
         user = User()
 
@@ -63,13 +63,13 @@ async def get_user(user_id: str = Depends(validate_token)):
     
 
 @router.post("/update_password")
-async def update_password(user_update_password_model: UserUpdatePasswordModel  = Body(...), user_id: str = Depends(validate_token)):
+async def update_password(user_update_password_model: UserUpdatePasswordModel  = Body(...), user_id: str = Depends(AuthenticationServices().validate_token)):
     try:
         user = User(user_update_password_model)
 
         user.set_id(user_id)
 
-        await user.get_user()
+        await user.get_user_by_id()
 
         await user.update_password()
 
@@ -90,13 +90,13 @@ async def update_password(user_update_password_model: UserUpdatePasswordModel  =
     
 
 @router.post("/update_display_name")
-async def update_display_name(user_update_display_name_model: UserUpdateDisplayNameModel  = Body(...), user_id: str = Depends(validate_token)):
+async def update_display_name(user_update_display_name_model: UserUpdateDisplayNameModel  = Body(...), user_id: str = Depends(AuthenticationServices().validate_token)):
     try:
         user = User()
 
         user.set_id(user_id)
 
-        await user.get_user()
+        await user.get_user_by_id()
 
         user.set_display_name(user_update_display_name_model.new_display_name)
         print(user_update_display_name_model.new_display_name)

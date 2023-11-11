@@ -1,11 +1,11 @@
 from fastapi import APIRouter, HTTPException, Body, Response, Request, Depends
 from typing import List
 from services.review_services import *
-from services.auth_services import validate_token, validate_token_unhandled
 from models.response import ErrorOut, SuccessOut
 from models.review import *
 from utils.logger import logger
 from services.recipe_services import get_recipe
+from services.auth_services import AuthenticationServices
 from exceptions.recipe_exceptions import RecipeNotFoundException
 from exceptions.review_exceptions import *
 
@@ -15,7 +15,7 @@ router = APIRouter()
 @router.get("/", response_model=List[ReviewDatabaseOut])
 async def root(response: Response, request: Request, page=1, recipe=""):
     try:
-        user_id = validate_token_unhandled(request)
+        user_id = AuthenticationServices().validate_token_unhandled(request)
         result = await get_reviews(page, recipe, user_id)
         response.headers["X-Total-Count"] = str(result["count"])
 
@@ -25,8 +25,9 @@ async def root(response: Response, request: Request, page=1, recipe=""):
         logger.error(e)
         raise HTTPException(status_code=400, detail=ErrorOut(message="An unknown error has occurred").model_dump())
     
+
 @router.get("/profile", response_model=List[ProfileReviewDatabaseOut])
-async def get_user_reviews(response: Response, page=1, user_id: str = Depends(validate_token)):
+async def get_user_reviews(response: Response, page=1, user_id: str = Depends(AuthenticationServices().validate_token)):
     try:
         result = await get_reviews_user(page, user_id)
         response.headers["X-Total-Count"] = str(result["count"])
@@ -37,8 +38,9 @@ async def get_user_reviews(response: Response, page=1, user_id: str = Depends(va
         logger.error(e)
         raise HTTPException(status_code=400, detail=ErrorOut(message="An unknown error has occurred").model_dump())
     
+
 @router.post("/create")
-async def create_review(review_data: Review = Body(...), user_id: str = Depends(validate_token)
+async def create_review(review_data: Review = Body(...), user_id: str = Depends(AuthenticationServices().validate_token)
 ):
     try:
         recipe = await get_recipe(review_data.recipe_id, user_id)
@@ -73,8 +75,9 @@ async def create_review(review_data: Review = Body(...), user_id: str = Depends(
         logger.error(e)
         raise HTTPException(status_code=500, detail=ErrorOut(message=str(e)).model_dump())
     
+
 @router.post("/delete/{review_id}", response_model=SuccessOut)
-async def delete_review(review_id: str, user_id: str = Depends(validate_token)
+async def delete_review(review_id: str, user_id: str = Depends(AuthenticationServices().validate_token)
 ):
     try:
         existing_review = await get_review(review_id)
